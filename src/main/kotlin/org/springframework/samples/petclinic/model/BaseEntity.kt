@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.samples.petclinic.model;
+package org.springframework.samples.petclinic.model
 
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.MappedSuperclass;
+import javax.persistence.GeneratedValue
+import javax.persistence.GenerationType
+import javax.persistence.Id
+import javax.persistence.MappedSuperclass
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnore
 
 /**
  * Simple JavaBean domain object with an id property. Used as a base class for objects needing this property.
@@ -29,21 +29,11 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  * @author Juergen Hoeller
  */
 @MappedSuperclass
-public class BaseEntity {
+abstract class BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    protected Integer id;
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-    @JsonIgnore
-    public boolean isNew() {
-        return this.id == null;
-    }
-
+    var id: Int? = null
+    val isNew: Boolean
+        @JsonIgnore
+        get() = this.id == null
 }

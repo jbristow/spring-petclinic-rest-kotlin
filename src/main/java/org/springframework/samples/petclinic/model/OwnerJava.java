@@ -52,7 +52,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 @Table(name = "owners")
 @JsonSerialize(using = JacksonCustomOwnerSerializer.class)
 @JsonDeserialize(using = JacksonCustomOwnerDeserializer.class)
-public class Owner extends Person {
+public class OwnerJava extends Person {
     @Column(name = "address")
     @NotEmpty
     private String address;
@@ -113,7 +113,7 @@ public class Owner extends Person {
 
     public void addPet(Pet pet) {
         getPetsInternal().add(pet);
-        pet.setOwner(this);
+//        pet.setOwner(this);
     }
 
     /**
