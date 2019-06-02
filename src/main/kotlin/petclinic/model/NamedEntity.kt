@@ -12,13 +12,12 @@ import javax.validation.constraints.NotEmpty
  * @author Juergen Hoeller
  */
 @MappedSuperclass
-open class NamedEntity : BaseEntity() {
-
-    @Column
-    @NotEmpty
-    var name: String? = null
+open class NamedEntity(
+    id: Int? = null,
+    @get:NotEmpty @Column var name: String? = null
+) : BaseEntity(id) {
 
     override fun toString(): String {
-        return name ?: ""
+        return """PetType[id=$id,name="$name"]"""
     }
 }

@@ -13,32 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package petclinic.model
+package petclinic.api.specialties
 
-import javax.persistence.Column
-import javax.persistence.MappedSuperclass
-import javax.validation.constraints.NotEmpty
+import petclinic.model.NamedEntity
+import javax.persistence.Entity
+import javax.persistence.Table
 
 /**
- * Simple JavaBean domain object representing an person.
+ * Models a [Vet&#39;s][Vet] specialties (for example, dentistry).
  *
- * @author Ken Krebs
+ * @author Juergen Hoeller
  */
-@MappedSuperclass
-open class Person(id: Int? = null, firstName: String?, lastName: String?) : BaseEntity(id) {
-
-    constructor() : this(null, null, null)
-
-    @Column(name = "firstName")
-    @get:NotEmpty
-    var firstName: String? = null
-
-    @Column(name = "last_name")
-    @get:NotEmpty
-    var lastName: String? = null
-
-    init {
-        this.firstName = firstName
-        this.lastName = lastName
-    }
+@Entity
+@Table(name = "specialties")
+open class Specialty(id: Int? = null, name: String? = null) : NamedEntity(id, name) {
+    constructor(other: Specialty) : this(other.id, other.name)
 }
