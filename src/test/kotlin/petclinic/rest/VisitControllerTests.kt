@@ -32,7 +32,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
-import petclinic.api.owner.Owner
+import petclinic.api.owners.Owner
 import petclinic.api.pets.Pet
 import petclinic.api.pettypes.PetType
 import petclinic.api.visits.Visit

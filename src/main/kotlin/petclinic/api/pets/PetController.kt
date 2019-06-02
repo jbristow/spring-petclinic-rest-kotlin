@@ -31,7 +31,7 @@ import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.util.UriComponentsBuilder
-import petclinic.api.owner.OwnerService
+import petclinic.api.owners.OwnerService
 import petclinic.api.pettypes.PetTypeService
 import javax.transaction.Transactional
 import javax.validation.Valid
@@ -68,7 +68,7 @@ class PetController(
     ): List<Pet> {
         val owner = ownerService.findOwnerById(ownerId) ?: throw ResponseStatusException(
             HttpStatus.NOT_FOUND,
-            "owner $ownerId not found"
+            "owners $ownerId not found"
         )
         return owner.pets
     }

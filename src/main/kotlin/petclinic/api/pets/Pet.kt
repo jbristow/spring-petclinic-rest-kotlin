@@ -17,7 +17,7 @@ package petclinic.api.pets
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import org.springframework.format.annotation.DateTimeFormat
-import petclinic.api.owner.Owner
+import petclinic.api.owners.Owner
 import petclinic.api.pettypes.PetType
 import petclinic.api.visits.Visit
 import petclinic.model.NamedEntity
@@ -68,6 +68,6 @@ open class Pet(
     }
 
     override fun toString(): String {
-        return """Pet[id=$id,name="$name",birthDate="$birthDate",type=$type,owner=$owner,visits=$visits]"""
+        return """Pet[id=$id,name="$name",birthDate="$birthDate",type=$type,owners=$owner,visits=$visits]"""
     }
 }

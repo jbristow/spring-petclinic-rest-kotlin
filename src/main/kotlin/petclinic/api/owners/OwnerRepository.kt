@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package petclinic.api.owner
+package petclinic.api.owners
 
 import org.springframework.context.annotation.Profile
 import org.springframework.data.repository.CrudRepository
 
 /**
- * Repository class for `owner` domain objects All method names are compliant with Spring Data naming
+ * Repository class for `owners` domain objects All method names are compliant with Spring Data naming
  * conventions so this interface can easily be extended for Spring Data See here: http://static.springsource.org/spring-data/jpa/docs/current/reference/html/jpa.repositories.html#jpa.query-methods.query-creation
  *
  * @author Ken Krebs
@@ -32,11 +32,11 @@ import org.springframework.data.repository.CrudRepository
 interface OwnerRepository : CrudRepository<Owner, Int> {
 
     /**
-     * Retrieve `owner`s from the data store by last name, returning all owners whose last name *starts*
+     * Retrieve `owners`s from the data store by last name, returning all owners whose last name *starts*
      * with the given name.
      *
      * @param lastName Value to search for
-     * @return a `Collection` of matching `owner`s (or an empty `Collection` if none
+     * @return a `Collection` of matching `owners`s (or an empty `Collection` if none
      * found)
      */
 

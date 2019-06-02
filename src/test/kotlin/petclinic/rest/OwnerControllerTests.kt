@@ -32,9 +32,9 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
-import petclinic.api.owner.Owner
-import petclinic.api.owner.OwnerController
-import petclinic.api.owner.OwnerService
+import petclinic.api.owners.Owner
+import petclinic.api.owners.OwnerController
+import petclinic.api.owners.OwnerService
 
 /**
  * Test class for [OwnerController]

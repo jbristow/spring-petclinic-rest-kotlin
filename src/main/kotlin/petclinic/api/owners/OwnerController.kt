@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package petclinic.api.owner
+package petclinic.api.owners
 
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus

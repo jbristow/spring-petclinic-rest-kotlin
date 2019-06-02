@@ -7,7 +7,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.junit.jupiter.SpringExtension
-import petclinic.api.owner.OwnerService
+import petclinic.api.owners.OwnerService
 import petclinic.api.pets.Pet
 import petclinic.api.pets.PetService
 import petclinic.api.pettypes.PetTypeService

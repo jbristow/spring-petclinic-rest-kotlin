@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package petclinic.api.owner
+package petclinic.api.owners
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import org.springframework.core.style.ToStringCreator
@@ -29,7 +29,7 @@ import javax.validation.constraints.Digits
 import javax.validation.constraints.NotEmpty
 
 /**
- * Simple JavaBean domain object representing an owner.
+ * Simple JavaBean domain object representing an owners.
  *
  * @author Ken Krebs
  * @author Juergen Hoeller
@@ -61,8 +61,8 @@ class Owner(
     )
 
     @Column
-    @OneToMany(cascade = [CascadeType.ALL], mappedBy = "owner", fetch = FetchType.EAGER, targetEntity = Pet::class)
-    @JsonIgnoreProperties("owner")
+    @OneToMany(cascade = [CascadeType.ALL], mappedBy = "owners", fetch = FetchType.EAGER, targetEntity = Pet::class)
+    @JsonIgnoreProperties("owners")
     var pets: List<Pet> = pets
         get() {
             return field.sortedBy { it.name ?: "" }
@@ -74,7 +74,7 @@ class Owner(
     }
 
     /**
-     * Return the Pet with the given name, or null if none found for this owner.
+     * Return the Pet with the given name, or null if none found for this owners.
      *
      * @param name to test
      * @return true if pets name is already in use
