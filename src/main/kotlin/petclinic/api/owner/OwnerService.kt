@@ -1,13 +1,29 @@
 package petclinic.api.owner
 
-interface OwnerService {
-    fun findOwnerById(id: Int): Owner?
+import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
-    fun findAllOwners(): List<Owner>
+@Service
+class OwnerService(private val ownerRepository: OwnerRepository) {
+    @Transactional(readOnly = true)
+    fun findAllOwners() =
+        ownerRepository.findAll().toList()
 
-    fun saveOwner(owner: Owner)
+    @Transactional
+    fun deleteOwner(owner: Owner) {
+        ownerRepository.delete(owner)
+    }
 
-    fun deleteOwner(owner: Owner)
+    @Transactional(readOnly = true)
+    fun findOwnerById(id: Int): Owner? =
+        ownerRepository.findById(id).orElse(null)
 
-    fun findOwnerByLastName(lastName: String): List<Owner>
+    @Transactional
+    fun saveOwner(owner: Owner) {
+        ownerRepository.save(owner)
+    }
+
+    @Transactional(readOnly = true)
+    fun findOwnerByLastName(lastName: String) =
+        ownerRepository.findByLastName(lastName).toList()
 }

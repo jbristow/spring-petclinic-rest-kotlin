@@ -15,9 +15,10 @@
  */
 package petclinic.api.owner
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import org.springframework.core.style.ToStringCreator
-import petclinic.model.Person
 import petclinic.api.pets.Pet
+import petclinic.model.Person
 import javax.persistence.CascadeType
 import javax.persistence.Column
 import javax.persistence.Entity
@@ -41,26 +42,27 @@ import javax.validation.constraints.NotEmpty
 @Entity
 class Owner(
     id: Int? = null,
-    firstName: String?,
-    lastName: String?,
-    @Column @get:NotEmpty var address: String?,
-    @Column @get:NotEmpty var city: String?,
-    @Column @get:NotEmpty @Digits(fraction = 0, integer = 10) var telephone: String?,
+    firstName: String? = null,
+    lastName: String? = null,
+    @Column @get:NotEmpty var address: String? = null,
+    @Column @get:NotEmpty var city: String? = null,
+    @Column @get:NotEmpty @Digits(fraction = 0, integer = 10) var telephone: String? = null,
     pets: List<Pet> = emptyList()
 ) : Person(id, firstName, lastName) {
 
-    constructor() : this(
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        emptyList<Pet>()
+    constructor(other: Owner) : this(
+        other.id,
+        other.firstName,
+        other.lastName,
+        other.address,
+        other.city,
+        other.telephone,
+        other.pets
     )
 
     @Column
     @OneToMany(cascade = [CascadeType.ALL], mappedBy = "owner", fetch = FetchType.EAGER, targetEntity = Pet::class)
+    @JsonIgnoreProperties("owner")
     var pets: List<Pet> = pets
         get() {
             return field.sortedBy { it.name ?: "" }

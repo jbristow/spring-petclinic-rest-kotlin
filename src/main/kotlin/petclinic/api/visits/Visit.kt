@@ -16,6 +16,7 @@
 package petclinic.api.visits
 
 import com.fasterxml.jackson.annotation.JsonFormat
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import org.springframework.format.annotation.DateTimeFormat
 import petclinic.api.pets.Pet
 import petclinic.model.BaseEntity
@@ -49,6 +50,7 @@ open class Visit(
 
     @get:NotEmpty @Column(name = "description") var description: String? = null,
 
+    @JsonIgnoreProperties("visits")
     @ManyToOne @JoinColumn(name = "pet_id") var pet: Pet? = null
 ) : BaseEntity(id) {
 

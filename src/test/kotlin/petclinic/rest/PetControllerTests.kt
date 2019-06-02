@@ -143,10 +143,10 @@ open class PetControllerTests {
 
     @Test
     fun testGetPetsByOwnerIdSuccess() {
-        val owner = Owner().apply {
-            id = 3
+        val owner = Owner(
+            id = 3,
             pets = listOf(pet3, pet4)
-        }
+        )
         given<Owner>(ownerService.findOwnerById(3)).willReturn(owner)
         mockMvc.perform(
             get("/api/pets/getPetsByOwnerId/3")

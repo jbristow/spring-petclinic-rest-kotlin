@@ -15,6 +15,7 @@
  */
 package petclinic.api.pets
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import org.springframework.format.annotation.DateTimeFormat
 import petclinic.api.owner.Owner
 import petclinic.api.pettypes.PetType
@@ -47,16 +48,18 @@ open class Pet(
     @Column(name = "birth_date") @Temporal(TemporalType.DATE) @DateTimeFormat(pattern = "yyyy/MM/dd") open var birthDate: Date? = null,
 
     @ManyToOne @JoinColumn(name = "type_id") var type: PetType? = null,
+    @JsonIgnoreProperties("pets")
     @ManyToOne @JoinColumn(name = "owner_id") var owner: Owner? = null,
     visits: Set<Visit> = emptySet()
 ) : NamedEntity(id, name) {
 
     constructor(other: Pet) : this(other.id, other.name, other.birthDate, other.type, other.owner, other.visits)
 
+    @JsonIgnoreProperties("pet")
     @OneToMany(cascade = [CascadeType.ALL], mappedBy = "pet", fetch = FetchType.EAGER, targetEntity = Visit::class)
     open var visits = visits
         get() {
-            return field.toSortedSet(kotlin.Comparator { o1, o2 -> o1.date.compareTo(o2.date) })
+            return field.toSortedSet(Comparator { o1, o2 -> o1.date.compareTo(o2.date) })
         }
 
     fun addVisit(visit: Visit) {

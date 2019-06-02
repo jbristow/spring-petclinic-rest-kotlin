@@ -16,7 +16,7 @@
 
 package petclinic.rest
 
-import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.junit.jupiter.api.Test
 import org.mockito.BDDMockito.given
 import org.springframework.beans.factory.annotation.Autowired
@@ -33,17 +33,17 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import petclinic.api.owner.Owner
-import petclinic.api.owner.OwnerRestController
+import petclinic.api.owner.OwnerController
 import petclinic.api.owner.OwnerService
 
 /**
- * Test class for [OwnerRestController]
+ * Test class for [OwnerController]
  *
  * @author Vitaliy Fedoriv
  */
-@WebMvcTest(controllers = [OwnerRestController::class])
+@WebMvcTest(controllers = [OwnerController::class])
 @AutoConfigureMockMvc
-open class OwnerRestControllerTests {
+open class OwnerControllerTests {
 
     @MockBean
     lateinit var ownerService: OwnerService
@@ -92,7 +92,7 @@ open class OwnerRestControllerTests {
 
     @Test
     fun testGetOwnerNotFound() {
-        given<Owner>(ownerService?.findOwnerById(-1)).willReturn(null)
+        given<Owner>(ownerService.findOwnerById(-1)).willReturn(null)
         mockMvc.perform(
             get("/api/owners/-1")
                 .accept(MediaType.APPLICATION_JSON)
@@ -124,7 +124,8 @@ open class OwnerRestControllerTests {
             get("/api/owners/?lastName=0")
                 .accept(MediaType.APPLICATION_JSON)
         )
-            .andExpect(status().isNotFound)
+            .andExpect(status().isOk)
+            .andExpect(content().string("[]"))
     }
 
     @Test
@@ -151,7 +152,8 @@ open class OwnerRestControllerTests {
             get("/api/owners/")
                 .accept(MediaType.APPLICATION_JSON)
         )
-            .andExpect(status().isNotFound)
+            .andExpect(status().isOk)
+            .andExpect(content().string("[]"))
     }
 
     @Test
@@ -159,8 +161,7 @@ open class OwnerRestControllerTests {
     fun testCreateOwnerSuccess() {
         val newOwner = owner1
         newOwner.id = 999
-        val mapper = ObjectMapper()
-        val newOwnerAsJSON = mapper.writeValueAsString(newOwner)
+        val newOwnerAsJSON = jacksonObjectMapper().writeValueAsString(newOwner)
         mockMvc.perform(
             post("/api/owners/")
                 .content(newOwnerAsJSON).accept(MediaType.APPLICATION_JSON_VALUE).contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -181,11 +182,10 @@ open class OwnerRestControllerTests {
     @Test
     @Throws(Exception::class)
     fun testUpdateOwnerSuccess() {
-        given<Owner>(ownerService?.findOwnerById(1)).willReturn(owner1)
+        given<Owner>(ownerService.findOwnerById(1)).willReturn(owner1)
         val newOwner = owner1
         newOwner.firstName = "George I"
-        val mapper = ObjectMapper()
-        val newOwnerAsJSON = mapper.writeValueAsString(newOwner)
+        val newOwnerAsJSON = jacksonObjectMapper().writeValueAsString(newOwner)
         mockMvc.perform(
             put("/api/owners/1")
                 .content(newOwnerAsJSON).accept(MediaType.APPLICATION_JSON_VALUE).contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -208,8 +208,7 @@ open class OwnerRestControllerTests {
     fun testUpdateOwnerError() {
         val newOwner = owner1
         newOwner.firstName = ""
-        val mapper = ObjectMapper()
-        val newOwnerAsJSON = mapper.writeValueAsString(newOwner)
+        val newOwnerAsJSON = jacksonObjectMapper().writeValueAsString(newOwner)
         mockMvc.perform(
             put("/api/owners/1")
                 .content(newOwnerAsJSON).accept(MediaType.APPLICATION_JSON_VALUE).contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -219,10 +218,9 @@ open class OwnerRestControllerTests {
 
     @Test
     fun testDeleteOwnerSuccess() {
-        val newOwner = owner1
-        val mapper = ObjectMapper()
-        val newOwnerAsJSON = mapper.writeValueAsString(newOwner)
-        given<Owner>(ownerService?.findOwnerById(1)).willReturn(owner1)
+        val newOwner = Owner(owner1)
+        val newOwnerAsJSON = jacksonObjectMapper().writeValueAsString(newOwner)
+        given<Owner>(ownerService.findOwnerById(1)).willReturn(owner1)
         mockMvc.perform(
             delete("/api/owners/1")
                 .content(newOwnerAsJSON).accept(MediaType.APPLICATION_JSON_VALUE).contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -232,10 +230,9 @@ open class OwnerRestControllerTests {
 
     @Test
     fun testDeleteOwnerError() {
-        val newOwner = owner1
-        val mapper = ObjectMapper()
-        val newOwnerAsJSON = mapper.writeValueAsString(newOwner)
-        given<Owner>(ownerService?.findOwnerById(-1)).willReturn(null)
+        val newOwner = Owner(owner1)
+        val newOwnerAsJSON = jacksonObjectMapper().writeValueAsString(newOwner)
+        given<Owner>(ownerService.findOwnerById(-1)).willReturn(null)
         mockMvc.perform(
             delete("/api/owners/-1")
                 .content(newOwnerAsJSON).accept(MediaType.APPLICATION_JSON_VALUE).contentType(MediaType.APPLICATION_JSON_VALUE)

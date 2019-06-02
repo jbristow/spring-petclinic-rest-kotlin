@@ -238,15 +238,8 @@
                 </executions>
                 <configuration>
                     <compilerPlugins>
-                        <!-- Or "spring" for the Spring support -->
                         <plugin>spring</plugin>
                     </compilerPlugins>
-
-                    <pluginOptions>
-                        <!-- Each annotation is placed on its own line -->
-                        <option>all-open:annotation=com.my.Annotation</option>
-                        <option>all-open:annotation=com.their.AnotherAnnotation</option>
-                    </pluginOptions>
                 </configuration>
 
                 <dependencies>
