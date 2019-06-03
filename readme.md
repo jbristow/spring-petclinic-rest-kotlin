@@ -108,17 +108,6 @@ File -> Import -> Maven -> Existing Maven project
 ```
 
 
-## Looking for something in particular?
-
-| Layer | Source |
-|--|--|
-| REST API controllers | [REST folder](src/main/java/org/springframework/samples/petclinic/rest) |
-| Service | [ClinicServiceImpl.java](src/main/java/org/springframework/samples/petclinic/service/ClinicServiceImpl.java) |
-|JDBC | [jdbc folder](src/main/java/org/springframework/samples/petclinic/repository/jdb) |
-| JPA | [jpa folder](src/main/java/org/springframework/samples/petclinic/repository/jpa) |
-| Spring Data JPA | [springdatajpa folder](src/main/java/org/springframework/samples/petclinic/repository/springdatajpa) |
-| Tests | [AbstractClinicServiceTests.java](src/test/java/org/springframework/samples/petclinic/service/AbstractClinicServiceTests.java) |
-
 # Contributing
 
 The [issue tracker](https://github.com/spring-petclinic/spring-petclinic-rest/issues) is the preferred channel for bug reports, features requests and submitting pull requests.
