@@ -3,6 +3,7 @@ To learn Kotlin and Kotlin best practices by collaborating with other engineers 
 
 
 # REST version of Spring PetClinic Sample Application (spring-framework-petclinic extend ) [![Build Status](https://travis-ci.org/spring-petclinic/spring-petclinic-rest.png?branch=master)](https://travis-ci.org/spring-petclinic/spring-petclinic-rest/)
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fjbristow%2Fspring-petclinic-rest-kotlin.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fjbristow%2Fspring-petclinic-rest-kotlin?ref=badge_shield)
 
 This backend version of the Spring Petclinic application only provides a REST API. **There is no UI**.
 The [spring-petclinic-angular project](https://github.com/spring-petclinic/spring-petclinic-angular) is a Angular 5 front-end application witch consumes the REST API.
@@ -120,3 +121,7 @@ For pull requests, editor preferences are available in the [editor config](https
 $ mvn antrun:run@ktlint-format
 ```
 
+
+
+## License
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fjbristow%2Fspring-petclinic-rest-kotlin.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fjbristow%2Fspring-petclinic-rest-kotlin?ref=badge_large)
