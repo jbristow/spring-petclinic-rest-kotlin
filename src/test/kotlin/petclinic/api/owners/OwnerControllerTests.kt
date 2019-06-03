@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package petclinic.rest
+package petclinic.api.owners
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.junit.jupiter.api.Test
@@ -32,9 +32,6 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
-import petclinic.api.owners.Owner
-import petclinic.api.owners.OwnerController
-import petclinic.api.owners.OwnerService
 
 /**
  * Test class for [OwnerController]

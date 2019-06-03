@@ -33,11 +33,6 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
-/**
- * Test class for [SpecialtyController]
- *
- * @author Vitaliy Fedoriv
- */
 @WebMvcTest(controllers = [SpecialtyController::class])
 @AutoConfigureMockMvc
 class SpecialtyControllerTests {
@@ -88,7 +83,7 @@ class SpecialtyControllerTests {
 
     @Test
     @Throws(Exception::class)
-    fun testGetAllSpecialtysSuccess() {
+    fun testGetAllSpecialtiesSuccess() {
         given(specialtyService.findAllSpecialties()).willReturn(listOf(surgery, dentistry))
         mockMvc.perform(
             get("/api/specialties/")
@@ -103,7 +98,7 @@ class SpecialtyControllerTests {
     }
 
     @Test
-    fun testGetAllSpecialtysNotFound() {
+    fun testGetAllSpecialtiesNotFound() {
         given(specialtyService.findAllSpecialties())
             .willReturn(emptyList())
         mockMvc.perform(

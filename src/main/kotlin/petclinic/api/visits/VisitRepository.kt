@@ -17,28 +17,9 @@ package petclinic.api.visits
 
 import org.springframework.context.annotation.Profile
 import org.springframework.data.repository.CrudRepository
-import petclinic.model.BaseEntity
-
-/**
- * Repository class for `Visit` domain objects All method names are compliant with Spring Data naming
- * conventions so this interface can easily be extended for Spring Data See here: http://static.springsource.org/spring-data/jpa/docs/current/reference/html/jpa.repositories.html#jpa.query-methods.query-creation
- *
- * @author Ken Krebs
- * @author Juergen Hoeller
- * @author Sam Brannen
- * @author Michael Isvy
- * @author Vitaliy Fedoriv
- */
 
 @Profile("spring-data-jpa")
 interface VisitRepository : CrudRepository<Visit, Int> {
-
-    /**
-     * Save a `Visit` to the data store, either inserting or updating it.
-     *
-     * @param visit the `Visit` to save
-     * @see BaseEntity.isNew
-     */
 
     fun findByPetId(petId: Int?): List<Visit>
 }

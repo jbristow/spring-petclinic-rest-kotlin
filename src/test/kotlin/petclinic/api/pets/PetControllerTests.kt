@@ -39,12 +39,6 @@ import petclinic.api.pettypes.PetType
 import petclinic.api.pettypes.PetTypeService
 import java.util.Date
 
-/**
- * Test class for [PetController]
- *
- * @author Vitaliy Fedoriv
- */
-
 @WebMvcTest(controllers = [PetController::class])
 @AutoConfigureMockMvc
 open class PetControllerTests {

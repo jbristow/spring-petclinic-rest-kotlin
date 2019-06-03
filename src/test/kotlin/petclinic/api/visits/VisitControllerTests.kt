@@ -37,11 +37,6 @@ import petclinic.api.pets.Pet
 import petclinic.api.pettypes.PetType
 import java.util.Date
 
-/**
- * Test class for [VisitController]
- *
- * @author Vitaliy Fedoriv
- */
 @WebMvcTest(controllers = [VisitController::class])
 @AutoConfigureMockMvc
 class VisitControllerTests {

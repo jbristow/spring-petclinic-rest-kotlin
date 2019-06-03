@@ -36,10 +36,6 @@ import petclinic.api.pettypes.PetTypeService
 import javax.transaction.Transactional
 import javax.validation.Valid
 
-/**
- * @author Vitaliy Fedoriv
- */
-
 @RestController
 @CrossOrigin(exposedHeaders = ["errors, content-type"])
 @RequestMapping("/api/pets")

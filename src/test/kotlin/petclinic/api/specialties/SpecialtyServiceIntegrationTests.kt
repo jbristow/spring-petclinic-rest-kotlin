@@ -9,13 +9,6 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import javax.transaction.Transactional
 
-/**
- *
- *  Integration test using the 'Spring Data' profile.
- *
- * @author Michael Isvy
- */
-
 @ExtendWith(SpringExtension::class)
 @SpringBootTest
 class SpecialtyServiceIntegrationTests(
@@ -29,7 +22,7 @@ class SpecialtyServiceIntegrationTests(
     }
 
     @Test
-    fun shouldFindAllSpecialtys() {
+    fun shouldFindAllSpecialties() {
         val specialties = specialtyService.findAllSpecialties()
         assertThat(specialties).extracting("id", "name")
             .contains(tuple(1, "radiology"), tuple(3, "dentistry"))

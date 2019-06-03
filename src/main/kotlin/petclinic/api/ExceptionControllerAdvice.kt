@@ -17,7 +17,7 @@
 package petclinic.api
 
 import com.fasterxml.jackson.core.JsonProcessingException
-import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.FieldError
@@ -27,25 +27,19 @@ import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.server.ResponseStatusException
 
-/**
- * @author Vitaliy Fedoriv
- */
-
 @ControllerAdvice
 class ExceptionControllerAdvice {
 
     @ExceptionHandler(Exception::class)
     fun exception(e: Exception): ResponseEntity<String> {
-        val mapper = ObjectMapper()
-        val errorInfo = ErrorInfo(e)
-        var respJSONstring = "{}"
-        try {
-            respJSONstring = mapper.writeValueAsString(errorInfo)
-        } catch (e1: JsonProcessingException) {
-            e1.printStackTrace()
-        }
-
-        return ResponseEntity.badRequest().body(respJSONstring)
+        return ResponseEntity.badRequest().body(
+            try {
+                jacksonObjectMapper().writeValueAsString(ErrorInfo(e))
+            } catch (e1: JsonProcessingException) {
+                e1.printStackTrace()
+                "{}"
+            }
+        )
     }
 
     private data class ErrorInfo(val className: String, val exMessage: String?) {

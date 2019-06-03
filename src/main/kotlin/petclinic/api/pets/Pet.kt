@@ -33,13 +33,6 @@ import javax.persistence.Table
 import javax.persistence.Temporal
 import javax.persistence.TemporalType
 
-/**
- * Simple business object representing a pets.
- *
- * @author Ken Krebs
- * @author Juergen Hoeller
- * @author Sam Brannen
- */
 @Entity
 @Table(name = "pets")
 open class Pet(

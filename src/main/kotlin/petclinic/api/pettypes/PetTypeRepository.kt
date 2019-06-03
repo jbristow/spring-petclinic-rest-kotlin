@@ -19,9 +19,5 @@ package petclinic.api.pettypes
 import org.springframework.context.annotation.Profile
 import org.springframework.data.repository.CrudRepository
 
-/**
- * @author Vitaliy Fedoriv
- */
-
 @Profile("spring-data-jpa")
 interface PetTypeRepository : CrudRepository<PetType, Int>

@@ -32,8 +32,7 @@ class PetServiceIntegrationTests(
         val owner6 = ownerService.findOwnerById(6)!!
         val found = owner6.pets.size
 
-        val pet = Pet()
-        pet.name = "bowser"
+        val pet = Pet(name = "bowser")
         val types = petTypeService.findAllPetTypes()
         print("types: $types")
         pet.type = types.find { it.id == 2 }

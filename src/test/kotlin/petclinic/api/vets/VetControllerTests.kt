@@ -33,11 +33,6 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
-/**
- * Test class for [VetController]
- *
- * @author Vitaliy Fedoriv
- */
 @WebMvcTest(controllers = [VetController::class])
 @AutoConfigureMockMvc
 class VetControllerTests {
@@ -54,7 +49,7 @@ class VetControllerTests {
         lastName = "Carter"
     }
 
-    val vet2 = Vet().apply {
+    private val vet2 = Vet().apply {
         id = 2
         firstName = "Helen"
         lastName = "Leary"

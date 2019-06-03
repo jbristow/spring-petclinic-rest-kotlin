@@ -35,10 +35,6 @@ import org.springframework.web.util.UriComponentsBuilder
 import javax.transaction.Transactional
 import javax.validation.Valid
 
-/**
- * @author Vitaliy Fedoriv
- */
-
 @RestController
 @CrossOrigin(exposedHeaders = ["errors, content-type"])
 @RequestMapping("/api/specialties")
@@ -66,7 +62,7 @@ class SpecialtyController {
     ): ResponseEntity<Specialty> {
         val headers = HttpHeaders()
         specialtyService.saveSpecialty(specialty)
-        headers.location = ucBuilder.path("/api/specialtys/{id}").buildAndExpand(specialty.id).toUri()
+        headers.location = ucBuilder.path("/api/specialties/{id}").buildAndExpand(specialty.id).toUri()
         return ResponseEntity(specialty, headers, HttpStatus.CREATED)
     }
 

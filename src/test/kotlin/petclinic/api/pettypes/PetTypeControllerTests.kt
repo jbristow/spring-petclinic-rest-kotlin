@@ -33,11 +33,6 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
-/**
- * Test class for [PetTypeController]
- *
- * @author Vitaliy Fedoriv
- */
 @WebMvcTest(controllers = [PetTypeController::class])
 @AutoConfigureMockMvc
 class PetTypeControllerTests {

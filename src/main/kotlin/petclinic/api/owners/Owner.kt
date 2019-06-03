@@ -28,18 +28,8 @@ import javax.persistence.Table
 import javax.validation.constraints.Digits
 import javax.validation.constraints.NotEmpty
 
-/**
- * Simple JavaBean domain object representing an owners.
- *
- * @author Ken Krebs
- * @author Juergen Hoeller
- * @author Sam Brannen
- * @author Michael Isvy
- */
-@Table(name = "owners")
-// @JsonSerialize(using = JacksonCustomOwnerSerializer::class)
-// @JsonDeserialize(using = JacksonCustomOwnerDeserializer::class)
 @Entity
+@Table(name = "owners")
 class Owner(
     id: Int? = null,
     firstName: String? = null,

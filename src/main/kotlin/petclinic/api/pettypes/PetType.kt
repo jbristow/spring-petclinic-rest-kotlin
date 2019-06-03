@@ -19,10 +19,6 @@ import petclinic.model.NamedEntity
 import javax.persistence.Entity
 import javax.persistence.Table
 
-/**
- * @author Juergen Hoeller
- * Can be Cat, Dog, Hamster...
- */
 @Entity
 @Table(name = "types")
 class PetType(id: Int? = null, name: String? = null) : NamedEntity(id, name) {

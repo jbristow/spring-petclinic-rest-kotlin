@@ -34,10 +34,6 @@ import org.springframework.web.util.UriComponentsBuilder
 import javax.transaction.Transactional
 import javax.validation.Valid
 
-/**
- * @author Vitaliy Fedoriv
- */
-
 @RestController
 @CrossOrigin(exposedHeaders = ["errors, content-type"])
 @RequestMapping("/api/visits")

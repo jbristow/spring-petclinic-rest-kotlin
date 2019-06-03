@@ -19,11 +19,6 @@ import petclinic.model.NamedEntity
 import javax.persistence.Entity
 import javax.persistence.Table
 
-/**
- * Models a [Vet&#39;s][Vet] specialties (for example, dentistry).
- *
- * @author Juergen Hoeller
- */
 @Entity
 @Table(name = "specialties")
 open class Specialty(id: Int? = null, name: String? = null) : NamedEntity(id, name) {
