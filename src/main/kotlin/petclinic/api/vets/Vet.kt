@@ -35,7 +35,7 @@ import javax.persistence.Table
  */
 @Entity
 @Table(name = "vets")
-open class Vet(
+class Vet(
     id: Int? = null,
     firstName: String? = null,
     lastName: String? = null,

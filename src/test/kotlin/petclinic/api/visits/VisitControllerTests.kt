@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package petclinic.rest
+package petclinic.api.visits
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.junit.jupiter.api.Test
@@ -35,9 +35,6 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import petclinic.api.owners.Owner
 import petclinic.api.pets.Pet
 import petclinic.api.pettypes.PetType
-import petclinic.api.visits.Visit
-import petclinic.api.visits.VisitController
-import petclinic.api.visits.VisitService
 import java.util.Date
 
 /**
@@ -140,7 +137,8 @@ class VisitControllerTests {
             get("/api/visits/")
                 .accept(MediaType.APPLICATION_JSON)
         )
-            .andExpect(status().isNotFound)
+            .andExpect(status().isOk)
+            .andExpect(content().string("[]"))
     }
 
     @Test

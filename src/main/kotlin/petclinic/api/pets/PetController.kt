@@ -65,12 +65,11 @@ class PetController(
     @GetMapping("/getPetsByOwnerId/{ownerId}")
     fun getPetsByOwnerId(
         @PathVariable("ownerId") ownerId: Int
-    ): List<Pet> {
-        val owner = ownerService.findOwnerById(ownerId) ?: throw ResponseStatusException(
+    ): Set<Pet> {
+        return ownerService.findOwnerById(ownerId)?.pets ?: throw ResponseStatusException(
             HttpStatus.NOT_FOUND,
             "owners $ownerId not found"
         )
-        return owner.pets
     }
 
     @PostMapping

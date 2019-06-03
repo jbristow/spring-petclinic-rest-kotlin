@@ -1,4 +1,4 @@
-package petclinic.service
+package petclinic.api.vets
 
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
@@ -9,8 +9,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 import petclinic.api.owners.OwnerService
 import petclinic.api.pets.PetService
 import petclinic.api.pettypes.PetTypeService
-import petclinic.api.vets.Vet
-import petclinic.api.vets.VetService
 import javax.transaction.Transactional
 
 @ExtendWith(SpringExtension::class)

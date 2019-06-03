@@ -1,4 +1,4 @@
-package petclinic.service
+package petclinic.api.pettypes
 
 import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat

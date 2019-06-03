@@ -1,4 +1,4 @@
-package petclinic.service
+package petclinic.api.pets
 
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.tuple
@@ -8,8 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import petclinic.api.owners.OwnerService
-import petclinic.api.pets.Pet
-import petclinic.api.pets.PetService
 import petclinic.api.pettypes.PetTypeService
 import java.util.Date
 import javax.transaction.Transactional

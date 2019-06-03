@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package petclinic.rest
+package petclinic.api.pets
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
@@ -35,9 +35,6 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPat
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import petclinic.api.owners.Owner
 import petclinic.api.owners.OwnerService
-import petclinic.api.pets.Pet
-import petclinic.api.pets.PetController
-import petclinic.api.pets.PetService
 import petclinic.api.pettypes.PetType
 import petclinic.api.pettypes.PetTypeService
 import java.util.Date
@@ -145,7 +142,7 @@ open class PetControllerTests {
     fun testGetPetsByOwnerIdSuccess() {
         val owner = Owner(
             id = 3,
-            pets = listOf(pet3, pet4)
+            pets = setOf(pet3, pet4)
         )
         given<Owner>(ownerService.findOwnerById(3)).willReturn(owner)
         mockMvc.perform(

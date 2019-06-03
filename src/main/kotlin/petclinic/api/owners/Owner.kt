@@ -47,7 +47,7 @@ class Owner(
     @Column @get:NotEmpty var address: String? = null,
     @Column @get:NotEmpty var city: String? = null,
     @Column @get:NotEmpty @Digits(fraction = 0, integer = 10) var telephone: String? = null,
-    pets: List<Pet> = emptyList()
+    pets: Set<Pet> = emptySet()
 ) : Person(id, firstName, lastName) {
 
     constructor(other: Owner) : this(
@@ -60,12 +60,21 @@ class Owner(
         other.pets
     )
 
+    private class PetComparator : Comparator<Pet> {
+        override fun compare(o1: Pet?, o2: Pet?) = when {
+            o1 == null && o2 == null -> 0
+            o1 == null -> -1
+            o2 == null -> 1
+            else -> o1.name?.compareTo(o2.name ?: "") ?: 0
+        }
+    }
+
     @Column
-    @OneToMany(cascade = [CascadeType.ALL], mappedBy = "owners", fetch = FetchType.EAGER, targetEntity = Pet::class)
+    @OneToMany(cascade = [CascadeType.ALL], mappedBy = "owner", fetch = FetchType.EAGER, targetEntity = Pet::class)
     @JsonIgnoreProperties("owners")
-    var pets: List<Pet> = pets
-        get() {
-            return field.sortedBy { it.name ?: "" }
+    var pets: Set<Pet> = pets.toSortedSet(PetComparator())
+        set(value) {
+            field = value.toSortedSet(PetComparator())
         }
 
     fun addPet(pet: Pet) {

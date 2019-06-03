@@ -29,6 +29,7 @@ import javax.persistence.Table
 import javax.persistence.Temporal
 import javax.persistence.TemporalType
 import javax.validation.constraints.NotEmpty
+import javax.validation.constraints.NotNull
 
 /**
  * Simple JavaBean domain object representing a visits.
@@ -51,7 +52,7 @@ open class Visit(
     @get:NotEmpty @Column(name = "description") var description: String? = null,
 
     @JsonIgnoreProperties("visits")
-    @ManyToOne @JoinColumn(name = "pet_id") var pet: Pet? = null
+    @ManyToOne @JoinColumn(name = "pet_id") @get:NotNull var pet: Pet? = null
 ) : BaseEntity(id) {
 
     constructor(other: Visit) : this(other.id, other.date, other.description, other.pet)

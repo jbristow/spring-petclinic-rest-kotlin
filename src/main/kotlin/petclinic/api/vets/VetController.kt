@@ -17,100 +17,69 @@ package petclinic.api.vets
 
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
-import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
-import org.springframework.validation.BindingResult
 import org.springframework.web.bind.annotation.CrossOrigin
+import org.springframework.web.bind.annotation.DeleteMapping
+import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestMethod
+import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.util.UriComponentsBuilder
-import petclinic.api.BindingErrorsResponse
-import java.util.ArrayList
 import javax.transaction.Transactional
 import javax.validation.Valid
-
-/**
- * @author Vitaliy Fedoriv
- */
 
 @RestController
 @CrossOrigin(exposedHeaders = ["errors, content-type"])
 @RequestMapping("/api/vets")
 class VetController(private var vetService: VetService) {
 
-    val allVets: ResponseEntity<Collection<Vet>>
-        @RequestMapping(value = [""], method = [RequestMethod.GET], produces = [MediaType.APPLICATION_JSON_UTF8_VALUE])
-        get() {
-            val vets = ArrayList<Vet>()
-            vets.addAll(vetService.findAllVets())
-            return if (vets.isEmpty()) {
-                ResponseEntity(HttpStatus.NOT_FOUND)
-            } else ResponseEntity(vets, HttpStatus.OK)
-        }
+    @GetMapping
+    @ResponseStatus(HttpStatus.OK)
+    fun getAllVets() = vetService.findAllVets()
 
-    @RequestMapping(
-        value = ["/{vetId}"],
-        method = [RequestMethod.GET],
-        produces = [MediaType.APPLICATION_JSON_UTF8_VALUE]
-    )
-    fun getVet(@PathVariable("vetId") vetId: Int): ResponseEntity<Vet> {
-        val vet = vetService.findVetById(vetId) ?: return ResponseEntity(HttpStatus.NOT_FOUND)
-        return ResponseEntity(vet, HttpStatus.OK)
-    }
+    @GetMapping("/{vetId}")
+    @ResponseStatus(HttpStatus.OK)
+    fun getVet(@PathVariable("vetId") vetId: Int) =
+        vetService.findVetById(vetId) ?: throw ResponseStatusException(
+            HttpStatus.NOT_FOUND,
+            "Vet $vetId not found"
+        )
 
-    @RequestMapping(value = [""], method = [RequestMethod.POST], produces = [MediaType.APPLICATION_JSON_UTF8_VALUE])
+    @PostMapping
     fun addVet(
-        @RequestBody @Valid vet: Vet?, bindingResult: BindingResult,
+        @RequestBody @Valid vet: Vet,
         ucBuilder: UriComponentsBuilder
     ): ResponseEntity<Vet> {
-        val errors = BindingErrorsResponse()
         val headers = HttpHeaders()
-        if (bindingResult.hasErrors() || vet == null) {
-            errors.addAllErrors(bindingResult)
-            headers.add("errors", errors.toJSON())
-            return ResponseEntity(headers, HttpStatus.BAD_REQUEST)
-        }
         vetService.saveVet(vet)
         headers.location = ucBuilder.path("/api/vets/{id}").buildAndExpand(vet.id).toUri()
         return ResponseEntity(vet, headers, HttpStatus.CREATED)
     }
 
-    @RequestMapping(
-        value = ["/{vetId}"],
-        method = [RequestMethod.PUT],
-        produces = [MediaType.APPLICATION_JSON_UTF8_VALUE]
-    )
-    fun updateVet(@PathVariable("vetId") vetId: Int, @RequestBody @Valid vet: Vet?, bindingResult: BindingResult): ResponseEntity<Vet> {
-        val errors = BindingErrorsResponse()
-        val headers = HttpHeaders()
-        if (bindingResult.hasErrors() || vet == null) {
-            errors.addAllErrors(bindingResult)
-            headers.add("errors", errors.toJSON())
-            return ResponseEntity(headers, HttpStatus.BAD_REQUEST)
-        }
-        val currentVet = vetService.findVetById(vetId) ?: return ResponseEntity(HttpStatus.NOT_FOUND)
-        currentVet.firstName = vet.firstName
-        currentVet.lastName = vet.lastName
-        currentVet.clearSpecialties()
-        for (spec in vet.specialties) {
-            currentVet.addSpecialty(spec)
-        }
-        vetService.saveVet(currentVet)
-        return ResponseEntity(currentVet, HttpStatus.NO_CONTENT)
-    }
+    @PutMapping("/{vetId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    fun updateVet(
+        @PathVariable("vetId") vetId: Int,
+        @RequestBody @Valid vet: Vet
+    ) =
+        vetService.findVetById(vetId)?.apply {
+            firstName = vet.firstName
+            lastName = vet.lastName
+            specialties = vet.specialties
+            vetService.saveVet(this)
+        } ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Vet $vetId not found")
 
-    @RequestMapping(
-        value = ["/{vetId}"],
-        method = [RequestMethod.DELETE],
-        produces = [MediaType.APPLICATION_JSON_UTF8_VALUE]
-    )
+    @DeleteMapping("/{vetId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     @Transactional
-    open fun deleteVet(@PathVariable("vetId") vetId: Int): ResponseEntity<Void> {
-        val vet = vetService.findVetById(vetId) ?: return ResponseEntity(HttpStatus.NOT_FOUND)
+    fun deleteVet(@PathVariable("vetId") vetId: Int) {
+        val vet =
+            vetService.findVetById(vetId) ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Vet $vetId not found")
         vetService.deleteVet(vet)
-        return ResponseEntity(HttpStatus.NO_CONTENT)
     }
 }
