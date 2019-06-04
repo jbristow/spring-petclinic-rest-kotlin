@@ -27,7 +27,6 @@ open class BaseEntity(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Int? = null
 ) {
-
     val isNew: Boolean
         @JsonIgnore
         get() = this.id == null

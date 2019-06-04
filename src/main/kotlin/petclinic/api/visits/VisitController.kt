@@ -16,7 +16,6 @@
 
 package petclinic.api.visits
 
-import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.CrossOrigin
@@ -29,7 +28,6 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
-import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.util.UriComponentsBuilder
 import javax.transaction.Transactional
 import javax.validation.Valid
@@ -37,29 +35,24 @@ import javax.validation.Valid
 @RestController
 @CrossOrigin(exposedHeaders = ["errors, content-type"])
 @RequestMapping("/api/visits")
-class VisitController(val visitService: VisitService) {
+class VisitController(val visitService: VisitRepository) {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    fun getAllVisits() = visitService.findAllVisits()
+    fun getAllVisits(): Iterable<Visit> = visitService.findAll()
 
     @GetMapping("/{visitId}")
     @ResponseStatus(HttpStatus.OK)
-    fun getVisit(@PathVariable("visitId") visitId: Int) =
-        visitService.findVisitById(visitId) ?: throw ResponseStatusException(
-            HttpStatus.NOT_FOUND,
-            "Visit $visitId not found."
-        )
+    fun getVisit(@PathVariable("visitId") visitId: Int): Visit =
+        visitService.findById(visitId).orElseThrow { Visit.NotFoundException(visitId) }
 
     @PostMapping
     fun addVisit(
         @RequestBody @Valid visit: Visit,
         ucBuilder: UriComponentsBuilder
     ): ResponseEntity<Visit> {
-        visitService.saveVisit(visit)
-        val headers = HttpHeaders()
-        headers.location = ucBuilder.path("/api/visits/{id}").buildAndExpand(visit.id).toUri()
-        return ResponseEntity(visit, headers, HttpStatus.CREATED)
+        val saved = visitService.save(visit)
+        return ResponseEntity.created(ucBuilder.path("/api/visits/{id}").buildAndExpand(visit.id).toUri()).body(saved)
     }
 
     @PutMapping("/{visitId}")
@@ -67,21 +60,19 @@ class VisitController(val visitService: VisitService) {
     fun updateVisit(
         @PathVariable("visitId") visitId: Int,
         @RequestBody @Valid visit: Visit
-    ) = visitService.findVisitById(visitId)?.apply {
-        date = visit.date
-        description = visit.description
-        pet = visit.pet
-        visitService.saveVisit(this)
-    } ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Visit $visitId not found.")
+    ): Visit =
+        visitService.findById(visitId).orElseThrow { Visit.NotFoundException(visitId) }.apply {
+            date = visit.date
+            description = visit.description
+            pet = visit.pet
+            visitService.save(this)
+        }
 
     @DeleteMapping("/{visitId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Transactional
     fun deleteVisit(@PathVariable("visitId") visitId: Int) {
-        val visit = visitService.findVisitById(visitId) ?: throw ResponseStatusException(
-            HttpStatus.NOT_FOUND,
-            "Visit $visitId not found."
-        )
-        visitService.deleteVisit(visit)
+        val visit = visitService.findById(visitId).orElseThrow { Visit.NotFoundException(visitId) }
+        visitService.delete(visit)
     }
 }

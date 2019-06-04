@@ -16,6 +16,7 @@
 package petclinic.api.vets
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import petclinic.api.RestNotFoundException
 import petclinic.api.specialties.Specialty
 import petclinic.model.Person
 import javax.persistence.Entity
@@ -58,4 +59,6 @@ class Vet(
     fun clearSpecialties() {
         specialties = emptySet()
     }
+
+    class NotFoundException(id: Int) : RestNotFoundException("Vet", id)
 }

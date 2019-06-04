@@ -41,5 +41,4 @@ interface OwnerRepository : CrudRepository<Owner, Int> {
      */
 
     fun findByLastName(lastName: String): List<Owner>
-
 }

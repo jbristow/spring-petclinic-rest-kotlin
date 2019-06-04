@@ -18,6 +18,7 @@ package petclinic.api.pettypes
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.junit.jupiter.api.Test
+import org.mockito.BDDMockito.any
 import org.mockito.BDDMockito.given
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
@@ -32,13 +33,14 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import java.util.Optional
 
 @WebMvcTest(controllers = [PetTypeController::class])
 @AutoConfigureMockMvc
 class PetTypeControllerTests {
 
     @MockBean
-    private lateinit var petTypeService: PetTypeService
+    private lateinit var petTypeRepository: PetTypeRepository
 
     @Autowired
     private lateinit var mockMvc: MockMvc
@@ -60,7 +62,7 @@ class PetTypeControllerTests {
 
     @Test
     fun testGetPetTypeSuccess() {
-        given<PetType>(petTypeService.findPetTypeById(1)).willReturn(cat)
+        given(petTypeRepository.findById(1)).willReturn(Optional.of(cat))
         mockMvc.perform(
             get("/api/pettypes/1")
                 .accept(MediaType.APPLICATION_JSON_VALUE)
@@ -73,7 +75,7 @@ class PetTypeControllerTests {
 
     @Test
     fun testGetPetTypeNotFound() {
-        given<PetType>(petTypeService.findPetTypeById(-1)).willReturn(null)
+        given(petTypeRepository.findById(-1)).willReturn(Optional.empty())
         mockMvc.perform(
             get("/api/pettypes/-1")
                 .accept(MediaType.APPLICATION_JSON)
@@ -83,7 +85,7 @@ class PetTypeControllerTests {
 
     @Test
     fun testGetAllPetTypesSuccess() {
-        given(petTypeService.findAllPetTypes()).willReturn(listOf(dog, snake))
+        given(petTypeRepository.findAll()).willReturn(listOf(dog, snake))
         mockMvc.perform(
             get("/api/pettypes/")
                 .accept(MediaType.APPLICATION_JSON)
@@ -97,8 +99,23 @@ class PetTypeControllerTests {
     }
 
     @Test
+    fun testGetAllPetTypesSuccessAlternate() {
+        given(petTypeRepository.findAll()).willReturn(listOf(dog, snake))
+        mockMvc.perform(
+            get("/api/pets/pettypes/")
+                .accept(MediaType.APPLICATION_JSON)
+        )
+            .andExpect(status().isOk)
+            .andExpect(content().contentType("application/json;charset=UTF-8"))
+            .andExpect(jsonPath("$.[0].id").value(2))
+            .andExpect(jsonPath("$.[0].name").value("dog"))
+            .andExpect(jsonPath("$.[1].id").value(4))
+            .andExpect(jsonPath("$.[1].name").value("snake"))
+    }
+
+    @Test
     fun testGetAllPetTypesNotFound() {
-        given(petTypeService.findAllPetTypes()).willReturn(emptyList())
+        given(petTypeRepository.findAll()).willReturn(emptyList())
         mockMvc.perform(
             get("/api/pettypes/")
                 .accept(MediaType.APPLICATION_JSON)
@@ -109,13 +126,15 @@ class PetTypeControllerTests {
 
     @Test
     fun testCreatePetTypeSuccess() {
-        val newPetType = PetType(cat)
-        newPetType.id = 999
-        val mapper = jacksonObjectMapper()
-        val newPetTypeAsJSON = mapper.writeValueAsString(newPetType)
+
+        val newPetType = PetType(cat).apply { id = 999 }
+
+        given(petTypeRepository.save(any<PetType>())).willReturn(newPetType)
         mockMvc.perform(
             post("/api/pettypes/")
-                .content(newPetTypeAsJSON).accept(MediaType.APPLICATION_JSON_VALUE).contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content(jacksonObjectMapper().writeValueAsString(newPetType))
+                .accept(MediaType.APPLICATION_JSON_VALUE)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
         )
             .andExpect(status().isCreated)
     }
@@ -134,14 +153,12 @@ class PetTypeControllerTests {
 
     @Test
     fun testUpdatePetTypeSuccess() {
-        given<PetType>(petTypeService.findPetTypeById(2)).willReturn(dog)
-        val newPetType = PetType(dog)
-        newPetType.name = "dog I"
-        val mapper = jacksonObjectMapper()
-        val newPetTypeAsJSON = mapper.writeValueAsString(newPetType)
+        given(petTypeRepository.findById(2)).willReturn(Optional.of(dog))
         mockMvc.perform(
             put("/api/pettypes/2")
-                .content(newPetTypeAsJSON).accept(MediaType.APPLICATION_JSON_VALUE).contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content(jacksonObjectMapper().writeValueAsString(PetType(dog).apply { name = "dog 2" }))
+                .accept(MediaType.APPLICATION_JSON_VALUE)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
         )
             .andExpect(content().contentType("application/json;charset=UTF-8"))
             .andExpect(status().isNoContent)
@@ -153,32 +170,30 @@ class PetTypeControllerTests {
             .andExpect(status().isOk)
             .andExpect(content().contentType("application/json;charset=UTF-8"))
             .andExpect(jsonPath("$.id").value(2))
-            .andExpect(jsonPath("$.name").value("dog I"))
+            .andExpect(jsonPath("$.name").value("dog 2"))
     }
 
     @Test
     @Throws(Exception::class)
     fun testUpdatePetTypeError() {
-        val newPetType = PetType(cat)
-        newPetType.name = ""
-        val mapper = jacksonObjectMapper()
-        val newPetTypeAsJSON = mapper.writeValueAsString(newPetType)
         mockMvc.perform(
             put("/api/pettypes/1")
-                .content(newPetTypeAsJSON).accept(MediaType.APPLICATION_JSON_VALUE).contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content(jacksonObjectMapper().writeValueAsString(PetType(cat).apply { name = "" }))
+                .accept(MediaType.APPLICATION_JSON_VALUE)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
         )
             .andExpect(status().isBadRequest)
     }
 
     @Test
     fun testDeletePetTypeSuccess() {
-        val newPetType = cat
-        val mapper = jacksonObjectMapper()
-        val newPetTypeAsJSON = mapper.writeValueAsString(newPetType)
-        given<PetType>(petTypeService.findPetTypeById(1)).willReturn(cat)
+        given(petTypeRepository.findById(1)).willReturn(Optional.of(cat))
+
         mockMvc.perform(
             delete("/api/pettypes/1")
-                .content(newPetTypeAsJSON).accept(MediaType.APPLICATION_JSON_VALUE).contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content(jacksonObjectMapper().writeValueAsString(cat))
+                .accept(MediaType.APPLICATION_JSON_VALUE)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
         )
             .andExpect(status().isNoContent)
     }
@@ -186,7 +201,7 @@ class PetTypeControllerTests {
     @Test
     fun testDeletePetTypeError() {
         val newPetTypeAsJSON = jacksonObjectMapper().writeValueAsString(PetType())
-        given<PetType>(petTypeService.findPetTypeById(-1)).willReturn(null)
+        given(petTypeRepository.findById(-1)).willReturn(Optional.empty())
         mockMvc.perform(
             delete("/api/pettypes/-1")
                 .content(newPetTypeAsJSON).accept(MediaType.APPLICATION_JSON_VALUE).contentType(MediaType.APPLICATION_JSON_VALUE)

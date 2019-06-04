@@ -18,42 +18,54 @@ package petclinic.api
 
 import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.FieldError
 import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
+import org.springframework.web.bind.annotation.ResponseBody
 import org.springframework.web.bind.annotation.ResponseStatus
-import org.springframework.web.server.ResponseStatusException
 
 @ControllerAdvice
 class ExceptionControllerAdvice {
 
+    val log: Logger = LoggerFactory.getLogger(this::class.java)
+
     @ExceptionHandler(Exception::class)
     fun exception(e: Exception): ResponseEntity<String> {
-        return ResponseEntity.badRequest().body(
-            try {
-                jacksonObjectMapper().writeValueAsString(ErrorInfo(e))
-            } catch (e1: JsonProcessingException) {
-                e1.printStackTrace()
-                "{}"
-            }
-        )
+        return ResponseEntity
+            .badRequest()
+            .body(
+                try {
+                    jacksonObjectMapper().writeValueAsString(ErrorInfo(e))
+                } catch (e: JsonProcessingException) {
+                    e.printStackTrace()
+                    "{}"
+                }
+            )
     }
 
     private data class ErrorInfo(val className: String, val exMessage: String?) {
-        constructor(ex: Exception) : this(ex.javaClass.name, ex.localizedMessage)
+        constructor(ex: Exception) :
+            this(ex.javaClass.name, ex.localizedMessage)
     }
 
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler(MethodArgumentNotValidException::class)
-    fun handleValidationExceptions(ex: MethodArgumentNotValidException) =
-        ex.bindingResult.allErrors.map {
-            (it as FieldError).field to it.defaultMessage
-        }.toMap()
+    data class ValidationMessage(val field: String, val message: String)
 
-    @ExceptionHandler(ResponseStatusException::class)
-    fun handleResponseStatusException(ex: ResponseStatusException) =
-        ResponseEntity(ex.reason, ex.status)
+    @ExceptionHandler(MethodArgumentNotValidException::class)
+    fun handleValidationExceptions(ex: MethodArgumentNotValidException): ResponseEntity<List<ValidationMessage>> =
+        ResponseEntity.badRequest()
+            .body(
+                ex.bindingResult.allErrors.map {
+                    ValidationMessage((it as FieldError).field, it.defaultMessage ?: "")
+                }
+            )
+
+    @ExceptionHandler(RestNotFoundException::class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ResponseBody
+    fun handleNotFound(ex: RestNotFoundException) = ex.message!!
 }

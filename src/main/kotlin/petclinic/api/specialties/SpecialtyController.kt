@@ -16,7 +16,6 @@
 
 package petclinic.api.specialties
 
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -30,7 +29,6 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
-import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.util.UriComponentsBuilder
 import javax.transaction.Transactional
 import javax.validation.Valid
@@ -38,22 +36,17 @@ import javax.validation.Valid
 @RestController
 @CrossOrigin(exposedHeaders = ["errors, content-type"])
 @RequestMapping("/api/specialties")
-class SpecialtyController {
-
-    @Autowired
-    private lateinit var specialtyService: SpecialtyService
+class SpecialtyController(private val specialtyRepository: SpecialtyRepository) {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    fun getAllSpecialties() =
-        specialtyService.findAllSpecialties()
+    fun getAllSpecialties(): Iterable<Specialty> =
+        specialtyRepository.findAll()
 
     @GetMapping("/{specialtyId}")
     @ResponseStatus(HttpStatus.OK)
-    fun getSpecialty(@PathVariable("specialtyId") specialtyId: Int): Specialty {
-        return specialtyService.findSpecialtyById(specialtyId)
-            ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Specialty $specialtyId not found.")
-    }
+    fun getSpecialty(@PathVariable("specialtyId") specialtyId: Int): Specialty =
+        specialtyRepository.findById(specialtyId).orElseThrow { Specialty.NotFoundException(specialtyId) }
 
     @PostMapping
     fun addSpecialty(
@@ -61,7 +54,7 @@ class SpecialtyController {
         ucBuilder: UriComponentsBuilder
     ): ResponseEntity<Specialty> {
         val headers = HttpHeaders()
-        specialtyService.saveSpecialty(specialty)
+        specialtyRepository.save(specialty)
         headers.location = ucBuilder.path("/api/specialties/{id}").buildAndExpand(specialty.id).toUri()
         return ResponseEntity(specialty, headers, HttpStatus.CREATED)
     }
@@ -71,18 +64,20 @@ class SpecialtyController {
     fun updateSpecialty(
         @PathVariable("specialtyId") specialtyId: Int,
         @RequestBody @Valid specialty: Specialty
-    ) =
-        specialtyService.findSpecialtyById(specialtyId)?.apply {
-            name = specialty.name
-            specialtyService.saveSpecialty(this)
-        } ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Specialty $specialtyId not found.")
+    ): Specialty =
+        specialtyRepository.save(
+            specialtyRepository
+                .findById(specialtyId)
+                .orElseThrow { Specialty.NotFoundException(specialtyId) }
+                .apply { name = specialty.name })
 
     @Transactional
     @DeleteMapping("/{specialtyId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     fun deleteSpecialty(@PathVariable("specialtyId") specialtyId: Int) {
-        val specialty = specialtyService.findSpecialtyById(specialtyId)
-            ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Specialty $specialtyId not found.")
-        specialtyService.deleteSpecialty(specialty)
+        val specialty =
+            specialtyRepository.findById(specialtyId)
+                .orElseThrow { Specialty.NotFoundException(specialtyId) }
+        specialtyRepository.delete(specialty)
     }
 }

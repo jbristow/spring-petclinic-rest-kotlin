@@ -15,7 +15,6 @@
  */
 package petclinic.api.vets
 
-import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.CrossOrigin
@@ -36,29 +35,25 @@ import javax.validation.Valid
 @RestController
 @CrossOrigin(exposedHeaders = ["errors, content-type"])
 @RequestMapping("/api/vets")
-class VetController(private var vetService: VetService) {
+class VetController(private var vetRepository: VetRepository) {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    fun getAllVets() = vetService.findAllVets()
+    fun getAllVets(): Iterable<Vet> = vetRepository.findAll()
 
     @GetMapping("/{vetId}")
     @ResponseStatus(HttpStatus.OK)
-    fun getVet(@PathVariable("vetId") vetId: Int) =
-        vetService.findVetById(vetId) ?: throw ResponseStatusException(
-            HttpStatus.NOT_FOUND,
-            "Vet $vetId not found"
-        )
+    fun getVet(@PathVariable("vetId") vetId: Int): Vet =
+        vetRepository.findById(vetId).orElseThrow { Vet.NotFoundException(vetId) }
 
     @PostMapping
     fun addVet(
         @RequestBody @Valid vet: Vet,
         ucBuilder: UriComponentsBuilder
     ): ResponseEntity<Vet> {
-        val headers = HttpHeaders()
-        vetService.saveVet(vet)
-        headers.location = ucBuilder.path("/api/vets/{id}").buildAndExpand(vet.id).toUri()
-        return ResponseEntity(vet, headers, HttpStatus.CREATED)
+        val saved = vetRepository.save(vet)
+        return ResponseEntity.created(ucBuilder.path("/api/vets/{id}").buildAndExpand(vet.id).toUri())
+            .body(saved)
     }
 
     @PutMapping("/{vetId}")
@@ -67,11 +62,11 @@ class VetController(private var vetService: VetService) {
         @PathVariable("vetId") vetId: Int,
         @RequestBody @Valid vet: Vet
     ) =
-        vetService.findVetById(vetId)?.apply {
+        vetRepository.findById(vetId).orElseThrow { Vet.NotFoundException(vetId) }.apply {
             firstName = vet.firstName
             lastName = vet.lastName
             specialties = vet.specialties
-            vetService.saveVet(this)
+            vetRepository.save(this)
         } ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Vet $vetId not found")
 
     @DeleteMapping("/{vetId}")
@@ -79,7 +74,7 @@ class VetController(private var vetService: VetService) {
     @Transactional
     fun deleteVet(@PathVariable("vetId") vetId: Int) {
         val vet =
-            vetService.findVetById(vetId) ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Vet $vetId not found")
-        vetService.deleteVet(vet)
+            vetRepository.findById(vetId).orElseThrow { Vet.NotFoundException(vetId) }
+        vetRepository.delete(vet)
     }
 }

@@ -15,6 +15,7 @@
  */
 package petclinic.api.specialties
 
+import petclinic.api.RestNotFoundException
 import petclinic.model.NamedEntity
 import javax.persistence.Entity
 import javax.persistence.Table
@@ -22,5 +23,8 @@ import javax.persistence.Table
 @Entity
 @Table(name = "specialties")
 open class Specialty(id: Int? = null, name: String? = null) : NamedEntity(id, name) {
+
     constructor(other: Specialty) : this(other.id, other.name)
+
+    class NotFoundException(id: Int) : RestNotFoundException("Specialty", id)
 }

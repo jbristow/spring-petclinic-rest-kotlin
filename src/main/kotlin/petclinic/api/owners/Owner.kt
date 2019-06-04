@@ -17,6 +17,7 @@ package petclinic.api.owners
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import org.springframework.core.style.ToStringCreator
+import petclinic.api.RestNotFoundException
 import petclinic.api.pets.Pet
 import petclinic.model.Person
 import javax.persistence.CascadeType
@@ -83,7 +84,6 @@ class Owner(
 
     override fun toString(): String {
         return ToStringCreator(this)
-
             .append("id", this.id)
             .append("new", this.isNew)
             .append("lastName", this.lastName)
@@ -93,4 +93,6 @@ class Owner(
             .append("telephone", this.telephone)
             .toString()
     }
+
+    class NotFoundException(ownerId: Int) : RestNotFoundException("Owner", ownerId)
 }

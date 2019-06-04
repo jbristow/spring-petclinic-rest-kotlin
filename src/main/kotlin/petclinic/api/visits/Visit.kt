@@ -18,6 +18,7 @@ package petclinic.api.visits
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import org.springframework.format.annotation.DateTimeFormat
+import petclinic.api.RestNotFoundException
 import petclinic.api.pets.Pet
 import petclinic.model.BaseEntity
 import java.util.Date
@@ -56,4 +57,6 @@ open class Visit(
 ) : BaseEntity(id) {
 
     constructor(other: Visit) : this(other.id, other.date, other.description, other.pet)
+
+    class NotFoundException(id: Int) : RestNotFoundException("Visit", id)
 }

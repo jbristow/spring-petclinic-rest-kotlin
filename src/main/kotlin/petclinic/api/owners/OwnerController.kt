@@ -16,7 +16,7 @@
 
 package petclinic.api.owners
 
-import org.springframework.http.HttpHeaders
+import org.springframework.hateoas.Resource
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.CrossOrigin
@@ -29,7 +29,6 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
-import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.util.UriComponentsBuilder
 import javax.transaction.Transactional
 import javax.validation.Valid
@@ -37,32 +36,33 @@ import javax.validation.Valid
 @RestController
 @CrossOrigin(exposedHeaders = ["errors, content-type"])
 @RequestMapping("/api/owners")
-class OwnerController(val ownerService: OwnerService) {
+class OwnerController(
+    private val ownerRepository: OwnerRepository
+) {
 
     @GetMapping
-    @ResponseStatus(HttpStatus.OK)
-    fun getOwners() =
-        ownerService.findAllOwners()
+    fun getOwners(): Iterable<Owner> = ownerRepository.findAll()
 
     @GetMapping("/*/lastname/{lastName}")
     @ResponseStatus(HttpStatus.OK)
     fun getOwnersList(@PathVariable("lastName") ownerLastName: String) =
-        ownerService.findOwnerByLastName(ownerLastName)
+        ownerRepository.findByLastName(ownerLastName)
 
     @GetMapping("/{ownerId}")
-    @ResponseStatus(HttpStatus.OK)
-    fun getOwner(@PathVariable("ownerId") ownerId: Int) =
-        ownerService.findOwnerById(ownerId) ?: throw ResponseStatusException(HttpStatus.NOT_FOUND)
+    fun getOwner(@PathVariable("ownerId") ownerId: Int): Resource<Owner> =
+        Resource(ownerRepository.findById(ownerId).orElseGet { throw Owner.NotFoundException(ownerId) })
 
     @PostMapping
     fun addOwner(
         @RequestBody @Valid owner: Owner,
-        ucBuilder: UriComponentsBuilder
+        uriComponentsBuilder: UriComponentsBuilder
     ): ResponseEntity<Owner> {
-        ownerService.saveOwner(owner)
-        val headers = HttpHeaders()
-        headers.location = ucBuilder.path("/api/owners/{id}").buildAndExpand(owner.id).toUri()
-        return ResponseEntity(owner, headers, HttpStatus.CREATED)
+        val output = ownerRepository.save(owner)
+        return ResponseEntity
+            .created(
+                uriComponentsBuilder.path("api/owners/{id}").buildAndExpand("${output.id}").toUri()
+            )
+            .body(output)
     }
 
     @PutMapping("/{ownerId}")
@@ -70,19 +70,32 @@ class OwnerController(val ownerService: OwnerService) {
     fun updateOwner(
         @PathVariable("ownerId") ownerId: Int,
         @RequestBody @Valid owner: Owner
-    ): Owner = ownerService.findOwnerById(ownerId)?.apply {
-        address = owner.address
-        city = owner.city
-        firstName = owner.firstName
-        lastName = owner.lastName
-        telephone = owner.telephone
-    } ?: throw ResponseStatusException(HttpStatus.NOT_FOUND)
+    ) =
+        Resource(ownerRepository.findById(ownerId)
+            .orElseGet { throw Owner.NotFoundException(ownerId) }
+            .apply {
+                address = owner.address
+                city = owner.city
+                firstName = owner.firstName
+                lastName = owner.lastName
+                telephone = owner.telephone
+            })
 
     @DeleteMapping("/{ownerId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Transactional
     fun deleteOwner(@PathVariable("ownerId") ownerId: Int) {
-        val owner = ownerService.findOwnerById(ownerId) ?: throw ResponseStatusException(HttpStatus.NOT_FOUND)
-        ownerService.deleteOwner(owner)
+        val owner = ownerRepository.findById(ownerId)
+            .orElseGet { throw Owner.NotFoundException(ownerId) }
+        ownerRepository.delete(owner)
     }
+
+    @GetMapping("/{ownerId}/pets")
+    fun getPetsForOwner(
+        @PathVariable("ownerId") ownerId: Int
+    ) =
+        ownerRepository
+            .findById(ownerId)
+            .orElseGet { throw Owner.NotFoundException(ownerId) }
+            .pets
 }

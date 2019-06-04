@@ -36,13 +36,14 @@ import petclinic.api.owners.Owner
 import petclinic.api.pets.Pet
 import petclinic.api.pettypes.PetType
 import java.util.Date
+import java.util.Optional
 
 @WebMvcTest(controllers = [VisitController::class])
 @AutoConfigureMockMvc
 class VisitControllerTests {
 
     @MockBean
-    private lateinit var visitService: VisitService
+    private lateinit var visitRepository: VisitRepository
 
     @Autowired
     private lateinit var mockMvc: MockMvc
@@ -86,7 +87,7 @@ class VisitControllerTests {
     @Test
     @Throws(Exception::class)
     fun testGetVisitSuccess() {
-        given<Visit>(visitService.findVisitById(2)).willReturn(visit2)
+        given(visitRepository.findById(2)).willReturn(Optional.of(visit2))
         mockMvc.perform(
             get("/api/visits/2")
                 .accept(MediaType.APPLICATION_JSON_VALUE)
@@ -100,7 +101,7 @@ class VisitControllerTests {
     @Test
     @Throws(Exception::class)
     fun testGetVisitNotFound() {
-        given<Visit>(visitService.findVisitById(-1)).willReturn(null)
+        given(visitRepository.findById(-1)).willReturn(Optional.empty())
         mockMvc.perform(
             get("/api/visits/-1")
                 .accept(MediaType.APPLICATION_JSON)
@@ -111,7 +112,7 @@ class VisitControllerTests {
     @Test
     @Throws(Exception::class)
     fun testGetAllVisitsSuccess() {
-        given(visitService.findAllVisits()).willReturn(listOf(visit2, visit3))
+        given(visitRepository.findAll()).willReturn(listOf(visit2, visit3))
         mockMvc.perform(
             get("/api/visits/")
                 .accept(MediaType.APPLICATION_JSON)
@@ -127,7 +128,7 @@ class VisitControllerTests {
     @Test
     @Throws(Exception::class)
     fun testGetAllVisitsNotFound() {
-        given(visitService.findAllVisits()).willReturn(emptyList())
+        given(visitRepository.findAll()).willReturn(emptyList())
         mockMvc.perform(
             get("/api/visits/")
                 .accept(MediaType.APPLICATION_JSON)
@@ -166,14 +167,15 @@ class VisitControllerTests {
 
     @Test
     fun testUpdateVisitSuccess() {
-        given<Visit>(visitService.findVisitById(2)).willReturn(visit2)
-        val newVisit = Visit(visit2)
-        newVisit.description = "rabies shot test"
-        val mapper = jacksonObjectMapper()
-        val newVisitAsJSON = mapper.writeValueAsString(newVisit)
+        given(visitRepository.findById(2)).willReturn(Optional.of(visit2))
+        val newVisit = Visit(visit2).apply {
+            description = "rabies shot test"
+        }
         mockMvc.perform(
             put("/api/visits/2")
-                .content(newVisitAsJSON).accept(MediaType.APPLICATION_JSON_VALUE).contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content(jacksonObjectMapper().writeValueAsString(newVisit)).accept(MediaType.APPLICATION_JSON_VALUE).contentType(
+                    MediaType.APPLICATION_JSON_VALUE
+                )
         )
             .andExpect(content().contentType("application/json;charset=UTF-8"))
             .andExpect(status().isNoContent)
@@ -190,12 +192,14 @@ class VisitControllerTests {
 
     @Test
     fun testUpdateVisitError() {
-        val newVisit = Visit(visit2)
-        newVisit.pet = null
-        val newVisitAsJSON = jacksonObjectMapper().writeValueAsString(newVisit)
+        val newVisit = Visit(visit2).apply {
+            pet = null
+        }
         mockMvc.perform(
             put("/api/visits/2")
-                .content(newVisitAsJSON).accept(MediaType.APPLICATION_JSON_VALUE).contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content(jacksonObjectMapper().writeValueAsString(newVisit))
+                .accept(MediaType.APPLICATION_JSON_VALUE)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
         )
             .andExpect(status().isBadRequest)
     }
@@ -203,12 +207,12 @@ class VisitControllerTests {
     @Test
     fun testDeleteVisitSuccess() {
         val newVisit = Visit(visit2)
-        val mapper = jacksonObjectMapper()
-        val newVisitAsJSON = mapper.writeValueAsString(newVisit)
-        given<Visit>(visitService.findVisitById(2)).willReturn(visit2)
+        given(visitRepository.findById(2)).willReturn(Optional.of(visit2))
         mockMvc.perform(
             delete("/api/visits/2")
-                .content(newVisitAsJSON).accept(MediaType.APPLICATION_JSON_VALUE).contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content(jacksonObjectMapper().writeValueAsString(newVisit))
+                .accept(MediaType.APPLICATION_JSON_VALUE)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
         )
             .andExpect(status().isNoContent)
     }
@@ -219,7 +223,7 @@ class VisitControllerTests {
         val newVisit = Visit(visit2)
         val mapper = jacksonObjectMapper()
         val newVisitAsJSON = mapper.writeValueAsString(newVisit)
-        given<Visit>(visitService.findVisitById(-1)).willReturn(null)
+        given(visitRepository.findById(-1)).willReturn(Optional.empty())
         mockMvc.perform(
             delete("/api/visits/-1")
                 .content(newVisitAsJSON).accept(MediaType.APPLICATION_JSON_VALUE).contentType(MediaType.APPLICATION_JSON_VALUE)

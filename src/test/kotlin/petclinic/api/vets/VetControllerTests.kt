@@ -32,33 +32,25 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import java.util.Optional
 
 @WebMvcTest(controllers = [VetController::class])
 @AutoConfigureMockMvc
 class VetControllerTests {
 
     @MockBean
-    private lateinit var vetService: VetService
+    private lateinit var vetRepository: VetRepository
 
     @Autowired
     private lateinit var mockMvc: MockMvc
 
-    private val vet1 = Vet().apply {
-        id = 1
-        firstName = "James"
-        lastName = "Carter"
-    }
-
-    private val vet2 = Vet().apply {
-        id = 2
-        firstName = "Helen"
-        lastName = "Leary"
-    }
+    private val vet1 = Vet(id = 1, firstName = "James", lastName = "Carter")
+    private val vet2 = Vet(id = 2, firstName = "Helen", lastName = "Leary")
 
     @Test
     @Throws(Exception::class)
     fun testGetVetSuccess() {
-        given<Vet>(vetService.findVetById(1)).willReturn(Vet(vet1))
+        given(vetRepository.findById(1)).willReturn(Optional.of(Vet(vet1)))
         mockMvc.perform(
             get("/api/vets/1")
                 .accept(MediaType.APPLICATION_JSON_VALUE)
@@ -72,7 +64,7 @@ class VetControllerTests {
     @Test
     @Throws(Exception::class)
     fun testGetVetNotFound() {
-        given<Vet>(vetService.findVetById(-1)).willReturn(null)
+        given(vetRepository.findById(-1)).willReturn(Optional.empty())
         mockMvc.perform(
             get("/api/vets/-1")
                 .accept(MediaType.APPLICATION_JSON)
@@ -83,7 +75,7 @@ class VetControllerTests {
     @Test
     @Throws(Exception::class)
     fun testGetAllVetsSuccess() {
-        given(vetService.findAllVets()).willReturn(listOf(vet1, vet2))
+        given(vetRepository.findAll()).willReturn(listOf(vet1, vet2))
         mockMvc.perform(
             get("/api/vets/")
                 .accept(MediaType.APPLICATION_JSON)
@@ -99,7 +91,7 @@ class VetControllerTests {
     @Test
     @Throws(Exception::class)
     fun testGetAllVetsNotFound() {
-        given(vetService.findAllVets()).willReturn(emptyList())
+        given(vetRepository.findAll()).willReturn(emptyList())
         mockMvc.perform(
             get("/api/vets/")
                 .accept(MediaType.APPLICATION_JSON)
@@ -110,13 +102,14 @@ class VetControllerTests {
 
     @Test
     fun testCreateVetSuccess() {
-        val newVet = Vet(vet1)
-        newVet.id = 999
-        val mapper = jacksonObjectMapper()
-        val newVetAsJSON = mapper.writeValueAsString(newVet)
+        val newVet = Vet(vet1).apply {
+            id = 999
+        }
         mockMvc.perform(
             post("/api/vets/")
-                .content(newVetAsJSON).accept(MediaType.APPLICATION_JSON_VALUE).contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content(jacksonObjectMapper().writeValueAsString(newVet)).accept(MediaType.APPLICATION_JSON_VALUE).contentType(
+                    MediaType.APPLICATION_JSON_VALUE
+                )
         )
             .andExpect(status().isCreated)
     }
@@ -124,29 +117,31 @@ class VetControllerTests {
     @Test
     @Throws(Exception::class)
     fun testCreateVetError() {
-        val newVet = Vet(vet1)
-        newVet.id = null
-        newVet.firstName = ""
-        val mapper = jacksonObjectMapper()
-        val newVetAsJSON = mapper.writeValueAsString(newVet)
+
+        val newVet = Vet(vet1).apply {
+            id = null
+            firstName = ""
+        }
         mockMvc.perform(
             post("/api/vets/")
-                .content(newVetAsJSON).accept(MediaType.APPLICATION_JSON_VALUE).contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content(jacksonObjectMapper().writeValueAsString(newVet))
+                .accept(MediaType.APPLICATION_JSON_VALUE)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
         )
             .andExpect(status().isBadRequest)
     }
 
     @Test
-    @Throws(Exception::class)
     fun testUpdateVetSuccess() {
-        given<Vet>(vetService.findVetById(1)).willReturn(Vet(vet1))
-        val newVet = Vet(vet1)
-        newVet.firstName = "James"
-        val mapper = jacksonObjectMapper()
-        val newVetAsJSON = mapper.writeValueAsString(newVet)
+        given(vetRepository.findById(1)).willReturn(Optional.of(Vet(vet1)))
+        val newVet = Vet(vet1).apply {
+            firstName = "James"
+        }
         mockMvc.perform(
             put("/api/vets/1")
-                .content(newVetAsJSON).accept(MediaType.APPLICATION_JSON_VALUE).contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content(jacksonObjectMapper().writeValueAsString(newVet))
+                .accept(MediaType.APPLICATION_JSON_VALUE)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
         )
             .andExpect(content().contentType("application/json;charset=UTF-8"))
             .andExpect(status().isNoContent)
@@ -162,44 +157,40 @@ class VetControllerTests {
     }
 
     @Test
-    @Throws(Exception::class)
     fun testUpdateVetError() {
-        val newVet = Vet(vet1)
-        newVet.firstName = ""
-        val mapper = jacksonObjectMapper()
-        val newVetAsJSON = mapper.writeValueAsString(newVet)
         mockMvc.perform(
             put("/api/vets/1")
-                .content(newVetAsJSON).accept(MediaType.APPLICATION_JSON_VALUE).contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content(jacksonObjectMapper().writeValueAsString(Vet(vet1).apply { firstName = "" }))
+                .accept(MediaType.APPLICATION_JSON_VALUE)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
         )
             .andExpect(status().isBadRequest)
     }
 
     @Test
-    @Throws(Exception::class)
     fun testDeleteVetSuccess() {
         val newVet = Vet(vet1)
-        val mapper = jacksonObjectMapper()
-        val newVetAsJSON = mapper.writeValueAsString(newVet)
-        given<Vet>(vetService.findVetById(1)).willReturn(Vet(vet1))
+
+        given(vetRepository.findById(1)).willReturn(Optional.of(Vet(vet1)))
+
         mockMvc.perform(
             delete("/api/vets/1")
-                .content(newVetAsJSON).accept(MediaType.APPLICATION_JSON_VALUE).contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content(jacksonObjectMapper().writeValueAsString(newVet))
+                .accept(MediaType.APPLICATION_JSON_VALUE)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
         )
             .andExpect(status().isNoContent)
     }
 
     @Test
     fun testDeleteVetError() {
-        val newVet = Vet(vet1)
-        val mapper = jacksonObjectMapper()
-        val newVetAsJSON = mapper.writeValueAsString(newVet)
-        given<Vet>(vetService.findVetById(-1)).willReturn(null)
+        given(vetRepository.findById(-1)).willReturn(Optional.empty())
+
         mockMvc.perform(
             delete("/api/vets/-1")
-                .content(newVetAsJSON).accept(MediaType.APPLICATION_JSON_VALUE).contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content(jacksonObjectMapper().writeValueAsString(Vet(vet1)))
+                .accept(MediaType.APPLICATION_JSON_VALUE).contentType(MediaType.APPLICATION_JSON_VALUE)
         )
             .andExpect(status().isNotFound)
     }
 }
-

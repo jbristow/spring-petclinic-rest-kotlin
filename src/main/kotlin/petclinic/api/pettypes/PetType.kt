@@ -15,6 +15,7 @@
  */
 package petclinic.api.pettypes
 
+import petclinic.api.RestNotFoundException
 import petclinic.model.NamedEntity
 import javax.persistence.Entity
 import javax.persistence.Table
@@ -28,4 +29,6 @@ class PetType(id: Int? = null, name: String? = null) : NamedEntity(id, name) {
     override fun toString(): String {
         return """PetType[id=$id,name="$name"]"""
     }
+
+    class NotFoundException(id: Int) : RestNotFoundException("PetType", id)
 }
