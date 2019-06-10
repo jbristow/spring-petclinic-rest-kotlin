@@ -34,8 +34,9 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import petclinic.api.owners.Owner
+import petclinic.api.owners.OwnerControllerTests.Companion.owner1
 import petclinic.api.owners.OwnerRepository
-import petclinic.api.pettypes.PetType
+import petclinic.api.pettypes.PetTypeControllerTests.Companion.dog
 import java.util.Date
 import java.util.Optional
 
@@ -52,33 +53,25 @@ open class PetControllerTests {
     @Autowired
     private lateinit var mockMvc: MockMvc
 
-    private val petOwner1 = Owner(
-        id = 1,
-        firstName = "Eduardo",
-        lastName = "Rodriquez",
-        address = "2693 Commerce St.",
-        city = "McFarland",
-        telephone = "6085558763"
-    )
+    companion object {
+        val pet3: Pet
+            get() = Pet(id = 3, name = "Rosy", birthDate = Date(), owner = owner1, type = dog)
 
-    private val petTypeDog = PetType(
-        id = 2,
-        name = "dog"
-    )
-    private val pet3 = Pet(
-        id = 3,
-        name = "Rosy",
-        birthDate = Date(),
-        owner = petOwner1,
-        type = petTypeDog
-    )
-    private val pet4 = Pet(
-        id = 4,
-        name = "Jewel",
-        birthDate = Date(),
-        owner = petOwner1,
-        type = petTypeDog
-    )
+        val pet4: Pet
+            get() = Pet(id = 4, name = "Jewel", birthDate = Date(), owner = owner1, type = dog)
+
+        val pet8: Pet
+            get() = Pet(id = 8, name = "Rosy", birthDate = Date(), owner = owner1, type = dog)
+
+        val newPet: Pet
+            get() = Pet(id = 999, name = "Rosy", birthDate = Date(), owner = owner1, type = dog)
+
+        val pet3EmptyName: Pet
+            get() = Pet(id = 3, name = "", birthDate = Date(), owner = owner1, type = dog)
+
+        val pet3UpdatedName: Pet
+            get() = Pet(id = 3, name = "Rosy I", birthDate = Date(), owner = owner1, type = dog)
+    }
 
     @Test
     fun testGetPetSuccess() {
@@ -171,7 +164,7 @@ open class PetControllerTests {
 
     @Test
     fun testCreatePetSuccess() {
-        val newPet = Pet(pet3).apply { id = 999 }
+
         given(petRepository.save(any<Pet>())).willReturn(newPet)
         mockMvc.perform(
             post("/api/pets/")
@@ -184,10 +177,9 @@ open class PetControllerTests {
 
     @Test
     fun testCreatePetError() {
-        val newPet = Pet()
         mockMvc.perform(
             post("/api/pets/")
-                .content(jacksonObjectMapper().writeValueAsString(newPet))
+                .content(jacksonObjectMapper().writeValueAsString(Pet()))
                 .accept(MediaType.APPLICATION_JSON_VALUE)
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
         )
@@ -199,7 +191,7 @@ open class PetControllerTests {
         given(petRepository.findById(3)).willReturn(Optional.of(pet3))
         mockMvc.perform(
             put("/api/pets/3")
-                .content(jacksonObjectMapper().writeValueAsString(Pet(pet3).apply { name = "Rosy I" }))
+                .content(jacksonObjectMapper().writeValueAsString(pet3UpdatedName))
                 .accept(MediaType.APPLICATION_JSON_VALUE)
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
         )
@@ -219,10 +211,9 @@ open class PetControllerTests {
 
     @Test
     fun testUpdatePetError() {
-
         mockMvc.perform(
             put("/api/pets/3")
-                .content(jacksonObjectMapper().writeValueAsString(Pet(pet3).apply { name = "" }))
+                .content(jacksonObjectMapper().writeValueAsString(pet3EmptyName))
                 .accept(MediaType.APPLICATION_JSON_VALUE)
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
         )
@@ -232,11 +223,9 @@ open class PetControllerTests {
     @Test
     fun testDeletePetSuccess() {
         given(petRepository.findById(3)).willReturn(Optional.of(pet3))
-
         mockMvc.perform(
             delete("/api/pets/3")
                 .accept(MediaType.APPLICATION_JSON_VALUE)
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .characterEncoding("utf-8")
         )
             .andExpect(status().isNoContent)
@@ -244,10 +233,8 @@ open class PetControllerTests {
 
     @Test
     fun testDeletePetError() {
-        given(petRepository.findById(-1)).willReturn(Optional.empty())
         mockMvc.perform(
             delete("/api/pets/-1")
-                .content(jacksonObjectMapper().writeValueAsString(pet3))
                 .accept(MediaType.APPLICATION_JSON_VALUE)
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
         )

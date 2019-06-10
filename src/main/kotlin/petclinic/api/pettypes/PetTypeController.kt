@@ -16,66 +16,20 @@
 
 package petclinic.api.pettypes
 
-import org.springframework.http.HttpStatus
-import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.CrossOrigin
-import org.springframework.web.bind.annotation.DeleteMapping
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.PutMapping
-import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
-import org.springframework.web.util.UriComponentsBuilder
-import javax.transaction.Transactional
-import javax.validation.Valid
+import petclinic.api.BaseController
 
 @RestController
 @CrossOrigin(exposedHeaders = ["errors, content-type"])
-@RequestMapping("/api")
-class PetTypeController(private val petTypeRepository: PetTypeRepository) {
+@RequestMapping("/api/pettypes")
+class PetTypeController(petTypeRepository: PetTypeRepository) :
+    BaseController<PetType, PetTypeRepository>("pettypes", petTypeRepository) {
 
-    @GetMapping(value = ["pettypes", "pets/pettypes"])
-    @ResponseStatus(HttpStatus.OK)
-    fun getAllPetTypes(): Iterable<PetType> = petTypeRepository.findAll()
+    override fun notFoundProvider(id: Int) = PetType.NotFoundException(id)
 
-    @ResponseStatus(HttpStatus.OK)
-    @GetMapping("pettypes/{petTypeId}")
-    fun getPetType(@PathVariable("petTypeId") petTypeId: Int): PetType =
-        petTypeRepository.findById(petTypeId).orElseThrow { PetType.NotFoundException(petTypeId) }
-
-    @PostMapping("pettypes")
-    fun addPetType(
-        @Valid @RequestBody petType: PetType,
-        ucBuilder: UriComponentsBuilder
-    ): ResponseEntity<PetType> {
-        val saved = petTypeRepository.save(petType)
-        return ResponseEntity
-            .created(ucBuilder.path("/api/pettypes/{id}").buildAndExpand(petType.id).toUri())
-            .body(saved)
-    }
-
-    @PutMapping("pettypes/{petTypeId}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    fun updatePetType(
-        @PathVariable("petTypeId") petTypeId: Int,
-        @RequestBody @Valid petType: PetType
-    ): PetType = petTypeRepository.findById(petTypeId)
-        .orElseThrow { PetType.NotFoundException(petTypeId) }
-        .apply {
-            name = petType.name
-            petTypeRepository.save(this)
-        }
-
-    @Transactional
-    @DeleteMapping("pettypes/{petTypeId}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    fun deletePetType(
-        @PathVariable("petTypeId") petTypeId: Int
-    ) {
-        val petType = petTypeRepository.findById(petTypeId).orElseThrow { PetType.NotFoundException(petTypeId) }
-        petTypeRepository.delete(petType)
+    override fun updateFn(a: PetType, b: PetType) {
+        a.name = b.name
     }
 }

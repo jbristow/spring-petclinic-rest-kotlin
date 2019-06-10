@@ -54,31 +54,65 @@ open class OwnerControllerTests {
     @Autowired
     lateinit var mockMvc: MockMvc
 
-    private val owner1 = Owner(
-        id = 1,
-        firstName = "George",
-        lastName = "Franklin",
-        address = "110 W. Liberty St.",
-        city = "Madison",
-        telephone = "6085551023"
-    )
-    private val owner2 = Owner(
-        id = 2,
-        firstName = "Betty",
-        lastName = "Davis",
-        address = "638 Cardinal Ave.",
-        city = "Sun Prairie",
-        telephone = "6085551749"
-    )
+    companion object {
+        val owner1: Owner
+            get() = Owner(
+                id = 1,
+                firstName = "George",
+                lastName = "Franklin",
+                address = "110 W. Liberty St.",
+                city = "Madison",
+                telephone = "6085551023"
+            )
+        val owner2: Owner
+            get() = Owner(
+                id = 2,
+                firstName = "Betty",
+                lastName = "Davis",
+                address = "638 Cardinal Ave.",
+                city = "Sun Prairie",
+                telephone = "6085551749"
+            )
 
-    private val owner4 = Owner(
-        id = 4,
-        firstName = "Harold",
-        lastName = "Davis",
-        address = "563 Friendly St.",
-        city = "Windsor",
-        telephone = "6085553198"
-    )
+        val owner4: Owner
+            get() = Owner(
+                id = 4,
+                firstName = "Harold",
+                lastName = "Davis",
+                address = "563 Friendly St.",
+                city = "Windsor",
+                telephone = "6085553198"
+            )
+        val newOwner
+            get() = Owner(
+                id = 999,
+                firstName = "George",
+                lastName = "Franklin",
+                address = "110 W. Liberty St.",
+                city = "Madison",
+                telephone = "6085551023"
+            )
+
+        val owner1Updated: Owner
+            get() = Owner(
+                id = 1,
+                firstName = "George I",
+                lastName = "Franklin",
+                address = "110 W. Liberty St.",
+                city = "Madison",
+                telephone = "6085551023"
+            )
+        val
+            owner1EmptyFirstName: Owner
+            get() = Owner(
+                id = 1,
+                firstName = "",
+                lastName = "Franklin",
+                address = "110 W. Liberty St.",
+                city = "Madison",
+                telephone = "6085551023"
+            )
+    }
 
     @Test
     fun testGetOwnerSuccess() {
@@ -101,7 +135,6 @@ open class OwnerControllerTests {
                 .accept(MediaType.APPLICATION_JSON)
         )
             .andExpect(status().isNotFound)
-            .andExpect(content().string("Owner -1 not found."))
     }
 
     @Test
@@ -163,8 +196,7 @@ open class OwnerControllerTests {
     @Test
     @Throws(Exception::class)
     fun testCreateOwnerSuccess() {
-        val newOwner = owner1
-        newOwner.id = 999
+
         val newOwnerAsJSON = jacksonObjectMapper().writeValueAsString(newOwner)
         given(ownerRepository.save(BDDMockito.any<Owner>())).willReturn(newOwner)
         mockMvc.perform(
@@ -199,9 +231,8 @@ open class OwnerControllerTests {
     @Throws(Exception::class)
     fun testUpdateOwnerSuccess() {
         given(ownerRepository.findById(1)).willReturn(Optional.of(owner1))
-        val newOwner = owner1
-        newOwner.firstName = "George I"
-        val newOwnerAsJSON = jacksonObjectMapper().writeValueAsString(newOwner)
+
+        val newOwnerAsJSON = jacksonObjectMapper().writeValueAsString(owner1Updated)
         mockMvc.perform(
             put("/api/owners/1")
                 .content(newOwnerAsJSON).accept(MediaType.APPLICATION_JSON_VALUE).contentType(MediaType.APPLICATION_JSON_VALUE)
@@ -222,36 +253,33 @@ open class OwnerControllerTests {
     @Test
     @Throws(Exception::class)
     fun testUpdateOwnerError() {
-        val newOwner = owner1
-        newOwner.firstName = ""
-        val newOwnerAsJSON = jacksonObjectMapper().writeValueAsString(newOwner)
         mockMvc.perform(
             put("/api/owners/1")
-                .content(newOwnerAsJSON).accept(MediaType.APPLICATION_JSON_VALUE).contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content(jacksonObjectMapper().writeValueAsString(owner1EmptyFirstName))
+                .accept(MediaType.APPLICATION_JSON_VALUE)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
         )
             .andExpect(status().isBadRequest)
     }
 
     @Test
     fun testDeleteOwnerSuccess() {
-        val newOwner = Owner(owner1)
-        val newOwnerAsJSON = jacksonObjectMapper().writeValueAsString(newOwner)
         given(ownerRepository.findById(1)).willReturn(Optional.of(owner1))
         mockMvc.perform(
             delete("/api/owners/1")
-                .content(newOwnerAsJSON).accept(MediaType.APPLICATION_JSON_VALUE).contentType(MediaType.APPLICATION_JSON_VALUE)
+                .accept(MediaType.APPLICATION_JSON_VALUE)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
         )
             .andExpect(status().isNoContent)
     }
 
     @Test
     fun testDeleteOwnerError() {
-        val newOwner = Owner(owner1)
-        val newOwnerAsJSON = jacksonObjectMapper().writeValueAsString(newOwner)
         given(ownerRepository.findById(-1)).willReturn(Optional.empty())
         mockMvc.perform(
             delete("/api/owners/-1")
-                .content(newOwnerAsJSON).accept(MediaType.APPLICATION_JSON_VALUE).contentType(MediaType.APPLICATION_JSON_VALUE)
+                .accept(MediaType.APPLICATION_JSON_VALUE)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
         )
             .andExpect(status().isNotFound)
     }

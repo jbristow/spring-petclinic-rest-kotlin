@@ -16,40 +16,31 @@
 
 package petclinic.api.pets
 
-import org.springframework.http.HttpStatus
-import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.CrossOrigin
-import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.PutMapping
-import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
-import org.springframework.web.util.UriComponentsBuilder
+import petclinic.api.BaseController
 import petclinic.api.owners.Owner
 import petclinic.api.owners.OwnerRepository
-import javax.transaction.Transactional
-import javax.validation.Valid
 
 @RestController
 @CrossOrigin(exposedHeaders = ["errors, content-type"])
 @RequestMapping("/api/pets")
 class PetController(
-    private var petRepository: PetRepository,
+    petRepository: PetRepository,
     private var ownerRepository: OwnerRepository
-) {
+) : BaseController<Pet, PetRepository>("pets", petRepository) {
 
-    @GetMapping
-    @ResponseStatus(HttpStatus.OK)
-    fun getPets(): Iterable<Pet> = petRepository.findAll()
+    override fun notFoundProvider(id: Int) = Pet.NotFoundException(id)
 
-    @GetMapping("/{petId}")
-    @ResponseStatus(HttpStatus.OK)
-    fun getPet(@PathVariable("petId") petId: Int): Pet =
-        petRepository.findById(petId).orElseGet { throw Pet.NotFoundException(petId) }
+    override fun updateFn(a: Pet, b: Pet) {
+        a.birthDate = b.birthDate
+        a.name = b.name
+        a.type = b.type
+        a.owner = b.owner
+    }
 
     @GetMapping("/getPetsByOwnerId/{ownerId}")
     fun getPetsByOwnerId(
@@ -59,38 +50,4 @@ class PetController(
             .findById(ownerId)
             .orElseGet { throw Owner.NotFoundException(ownerId) }
             .pets
-
-    @PostMapping
-    fun addPet(
-        @Valid @RequestBody pet: Pet,
-        ucBuilder: UriComponentsBuilder
-    ): ResponseEntity<Pet> {
-        val saved = petRepository.save(pet)
-        return ResponseEntity
-            .created(ucBuilder.path("/api/pets/{id}").buildAndExpand(saved.id).toUri())
-            .body(pet)
-    }
-
-    @PutMapping("/{petId}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    fun updatePet(
-        @PathVariable("petId") petId: Int,
-        @Valid @RequestBody pet: Pet
-    ) =
-        petRepository.findById(petId).orElseGet { throw Pet.NotFoundException(petId) }.apply {
-            birthDate = pet.birthDate
-            name = pet.name
-            type = pet.type
-            owner = pet.owner
-            petRepository.save(this)
-        }
-
-    @Transactional
-    @DeleteMapping("/{petId}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    fun deletePet(@PathVariable("petId") petId: Int) {
-        petRepository.delete(
-            petRepository.findById(petId).orElseGet { throw Pet.NotFoundException(petId) }
-        )
-    }
 }

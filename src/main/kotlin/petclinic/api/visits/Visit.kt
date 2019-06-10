@@ -59,4 +59,6 @@ open class Visit(
     constructor(other: Visit) : this(other.id, other.date, other.description, other.pet)
 
     class NotFoundException(id: Int) : RestNotFoundException("Visit", id)
+
+    override fun toString() = "Visit(id=$id, pet=$pet, description=$description, date=$date)"
 }

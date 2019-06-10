@@ -18,6 +18,7 @@ package petclinic.api.vets
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.junit.jupiter.api.Test
+import org.mockito.BDDMockito.any
 import org.mockito.BDDMockito.given
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
@@ -32,6 +33,8 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import petclinic.api.specialties.SpecialtyControllerTests.Companion.radiology
+import petclinic.api.specialties.SpecialtyControllerTests.Companion.surgery
 import java.util.Optional
 
 @WebMvcTest(controllers = [VetController::class])
@@ -44,13 +47,23 @@ class VetControllerTests {
     @Autowired
     private lateinit var mockMvc: MockMvc
 
-    private val vet1 = Vet(id = 1, firstName = "James", lastName = "Carter")
-    private val vet2 = Vet(id = 2, firstName = "Helen", lastName = "Leary")
+    companion object {
+        val vet1: Vet
+            get() = Vet(id = 1, firstName = "James", lastName = "Carter", specialties = setOf(surgery, radiology))
+        val vet2: Vet
+            get() = Vet(id = 2, firstName = "Helen", lastName = "Leary", specialties = setOf(radiology))
+        val newVet: Vet
+            get() = Vet(id = 999, firstName = "James", lastName = "Carter", specialties = setOf(surgery, radiology))
+        val vet1EmptyFirstName: Vet
+            get() = Vet(firstName = "", lastName = "Carter", specialties = setOf(surgery, radiology))
+        val vet1Updated: Vet
+            get() = Vet(id = 1, firstName = "James II", lastName = "Carter", specialties = setOf(surgery, radiology))
+    }
 
     @Test
     @Throws(Exception::class)
     fun testGetVetSuccess() {
-        given(vetRepository.findById(1)).willReturn(Optional.of(Vet(vet1)))
+        given(vetRepository.findById(1)).willReturn(Optional.of(vet1))
         mockMvc.perform(
             get("/api/vets/1")
                 .accept(MediaType.APPLICATION_JSON_VALUE)
@@ -102,9 +115,7 @@ class VetControllerTests {
 
     @Test
     fun testCreateVetSuccess() {
-        val newVet = Vet(vet1).apply {
-            id = 999
-        }
+        given(vetRepository.save(any<Vet>())).willReturn(newVet)
         mockMvc.perform(
             post("/api/vets/")
                 .content(jacksonObjectMapper().writeValueAsString(newVet)).accept(MediaType.APPLICATION_JSON_VALUE).contentType(
@@ -118,13 +129,9 @@ class VetControllerTests {
     @Throws(Exception::class)
     fun testCreateVetError() {
 
-        val newVet = Vet(vet1).apply {
-            id = null
-            firstName = ""
-        }
         mockMvc.perform(
             post("/api/vets/")
-                .content(jacksonObjectMapper().writeValueAsString(newVet))
+                .content(jacksonObjectMapper().writeValueAsString(vet1EmptyFirstName))
                 .accept(MediaType.APPLICATION_JSON_VALUE)
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
         )
@@ -133,13 +140,11 @@ class VetControllerTests {
 
     @Test
     fun testUpdateVetSuccess() {
-        given(vetRepository.findById(1)).willReturn(Optional.of(Vet(vet1)))
-        val newVet = Vet(vet1).apply {
-            firstName = "James"
-        }
+        given(vetRepository.findById(1)).willReturn(Optional.of(vet1))
+
         mockMvc.perform(
             put("/api/vets/1")
-                .content(jacksonObjectMapper().writeValueAsString(newVet))
+                .content(jacksonObjectMapper().writeValueAsString(vet1Updated))
                 .accept(MediaType.APPLICATION_JSON_VALUE)
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
         )
@@ -153,14 +158,14 @@ class VetControllerTests {
             .andExpect(status().isOk)
             .andExpect(content().contentType("application/json;charset=UTF-8"))
             .andExpect(jsonPath("$.id").value(1))
-            .andExpect(jsonPath("$.firstName").value("James"))
+            .andExpect(jsonPath("$.firstName").value("James II"))
     }
 
     @Test
     fun testUpdateVetError() {
         mockMvc.perform(
             put("/api/vets/1")
-                .content(jacksonObjectMapper().writeValueAsString(Vet(vet1).apply { firstName = "" }))
+                .content(jacksonObjectMapper().writeValueAsString(vet1EmptyFirstName))
                 .accept(MediaType.APPLICATION_JSON_VALUE)
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
         )
@@ -169,13 +174,10 @@ class VetControllerTests {
 
     @Test
     fun testDeleteVetSuccess() {
-        val newVet = Vet(vet1)
-
-        given(vetRepository.findById(1)).willReturn(Optional.of(Vet(vet1)))
+        given(vetRepository.findById(1)).willReturn(Optional.of(vet1))
 
         mockMvc.perform(
             delete("/api/vets/1")
-                .content(jacksonObjectMapper().writeValueAsString(newVet))
                 .accept(MediaType.APPLICATION_JSON_VALUE)
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
         )
@@ -188,7 +190,6 @@ class VetControllerTests {
 
         mockMvc.perform(
             delete("/api/vets/-1")
-                .content(jacksonObjectMapper().writeValueAsString(Vet(vet1)))
                 .accept(MediaType.APPLICATION_JSON_VALUE).contentType(MediaType.APPLICATION_JSON_VALUE)
         )
             .andExpect(status().isNotFound)

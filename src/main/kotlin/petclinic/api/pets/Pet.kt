@@ -62,7 +62,7 @@ open class Pet(
     }
 
     override fun toString(): String {
-        return """Pet[id=$id,name="$name",birthDate="$birthDate",type=$type,owners=$owner,visits=$visits]"""
+        return "Pet(id=$id, name=$name, birthDate=$birthDate, type=$type, owner=$owner)"
     }
 
     class NotFoundException(id: Int) : RestNotFoundException("Pet", id)

@@ -8,9 +8,4 @@ import javax.validation.constraints.NotEmpty
 open class NamedEntity(
     id: Int? = null,
     @get:NotEmpty @Column var name: String? = null
-) : BaseEntity(id) {
-
-    override fun toString(): String {
-        return """PetType[id=$id,name="$name"]"""
-    }
-}
+) : BaseEntity(id)

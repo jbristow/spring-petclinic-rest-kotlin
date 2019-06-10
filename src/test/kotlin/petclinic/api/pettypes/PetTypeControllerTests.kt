@@ -45,19 +45,13 @@ class PetTypeControllerTests {
     @Autowired
     private lateinit var mockMvc: MockMvc
 
-    private val cat = PetType().apply {
-        id = 1
-        name = "cat"
-    }
-
-    private val dog = PetType().apply {
-        id = 2
-        name = "dog"
-    }
-
-    private val snake = PetType().apply {
-        id = 4
-        name = "snake"
+    companion object {
+        val cat: PetType
+            get() = PetType(id = 1, name = "cat")
+        val dog: PetType
+            get() = PetType(id = 2, name = "dog")
+        val snake: PetType
+            get() = PetType(id = 4, name = "snake")
     }
 
     @Test
@@ -88,21 +82,6 @@ class PetTypeControllerTests {
         given(petTypeRepository.findAll()).willReturn(listOf(dog, snake))
         mockMvc.perform(
             get("/api/pettypes/")
-                .accept(MediaType.APPLICATION_JSON)
-        )
-            .andExpect(status().isOk)
-            .andExpect(content().contentType("application/json;charset=UTF-8"))
-            .andExpect(jsonPath("$.[0].id").value(2))
-            .andExpect(jsonPath("$.[0].name").value("dog"))
-            .andExpect(jsonPath("$.[1].id").value(4))
-            .andExpect(jsonPath("$.[1].name").value("snake"))
-    }
-
-    @Test
-    fun testGetAllPetTypesSuccessAlternate() {
-        given(petTypeRepository.findAll()).willReturn(listOf(dog, snake))
-        mockMvc.perform(
-            get("/api/pets/pettypes/")
                 .accept(MediaType.APPLICATION_JSON)
         )
             .andExpect(status().isOk)

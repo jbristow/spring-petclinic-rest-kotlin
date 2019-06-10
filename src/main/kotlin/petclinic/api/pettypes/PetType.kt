@@ -26,9 +26,7 @@ class PetType(id: Int? = null, name: String? = null) : NamedEntity(id, name) {
 
     constructor(other: PetType) : this(other.id, other.name)
 
-    override fun toString(): String {
-        return """PetType[id=$id,name="$name"]"""
-    }
-
     class NotFoundException(id: Int) : RestNotFoundException("PetType", id)
+
+    override fun toString() = "PetType(id=$id, name=$name)"
 }

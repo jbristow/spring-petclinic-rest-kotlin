@@ -16,63 +16,21 @@
 
 package petclinic.api.visits
 
-import org.springframework.http.HttpStatus
-import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.CrossOrigin
-import org.springframework.web.bind.annotation.DeleteMapping
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.PutMapping
-import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
-import org.springframework.web.util.UriComponentsBuilder
-import javax.transaction.Transactional
-import javax.validation.Valid
+import petclinic.api.BaseController
 
 @RestController
 @CrossOrigin(exposedHeaders = ["errors, content-type"])
 @RequestMapping("/api/visits")
-class VisitController(val visitService: VisitRepository) {
+class VisitController(repository: VisitRepository) : BaseController<Visit, VisitRepository>("visits", repository) {
 
-    @GetMapping
-    @ResponseStatus(HttpStatus.OK)
-    fun getAllVisits(): Iterable<Visit> = visitService.findAll()
+    override fun notFoundProvider(id: Int) = Visit.NotFoundException(id)
 
-    @GetMapping("/{visitId}")
-    @ResponseStatus(HttpStatus.OK)
-    fun getVisit(@PathVariable("visitId") visitId: Int): Visit =
-        visitService.findById(visitId).orElseThrow { Visit.NotFoundException(visitId) }
-
-    @PostMapping
-    fun addVisit(
-        @RequestBody @Valid visit: Visit,
-        ucBuilder: UriComponentsBuilder
-    ): ResponseEntity<Visit> {
-        val saved = visitService.save(visit)
-        return ResponseEntity.created(ucBuilder.path("/api/visits/{id}").buildAndExpand(visit.id).toUri()).body(saved)
-    }
-
-    @PutMapping("/{visitId}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    fun updateVisit(
-        @PathVariable("visitId") visitId: Int,
-        @RequestBody @Valid visit: Visit
-    ): Visit =
-        visitService.findById(visitId).orElseThrow { Visit.NotFoundException(visitId) }.apply {
-            date = visit.date
-            description = visit.description
-            pet = visit.pet
-            visitService.save(this)
-        }
-
-    @DeleteMapping("/{visitId}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    @Transactional
-    fun deleteVisit(@PathVariable("visitId") visitId: Int) {
-        val visit = visitService.findById(visitId).orElseThrow { Visit.NotFoundException(visitId) }
-        visitService.delete(visit)
+    override fun updateFn(a: Visit, b: Visit) {
+        a.date = b.date
+        a.description = b.description
+        a.pet = b.pet
     }
 }

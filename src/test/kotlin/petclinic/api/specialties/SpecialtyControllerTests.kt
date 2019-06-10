@@ -40,19 +40,30 @@ import java.util.Optional
 class SpecialtyControllerTests {
 
     @MockBean
-    private lateinit var specialtyService: SpecialtyRepository
+    private lateinit var specialtyRepository: SpecialtyRepository
 
     @Autowired
     private lateinit var mockMvc: MockMvc
 
-    private val radiology = Specialty(id = 1, name = "radiology")
-    private val surgery = Specialty(id = 2, name = "surgery")
-    private val dentistry = Specialty(id = 3, name = "dentistry")
+    companion object {
+        val radiology: Specialty
+            get() = Specialty(id = 1, name = "radiology")
+        val surgery: Specialty
+            get() = Specialty(id = 2, name = "surgery")
+        val dentistry: Specialty
+            get() = Specialty(id = 3, name = "dentistry")
+        val emptyName: Specialty
+            get() = Specialty(id = 1, name = "")
+        val renamedSurgery: Specialty
+            get() = Specialty(id = 2, name = "surgery I")
+        val newSpecialty: Specialty
+            get() = Specialty(id = 999, name = "radiology")
+    }
 
     @Test
     @Throws(Exception::class)
     fun testGetSpecialtySuccess() {
-        given(specialtyService.findById(1)).willReturn(Optional.of(radiology))
+        given(specialtyRepository.findById(1)).willReturn(Optional.of(radiology))
         mockMvc.perform(
             get("/api/specialties/1")
                 .accept(MediaType.APPLICATION_JSON_VALUE)
@@ -66,7 +77,7 @@ class SpecialtyControllerTests {
     @Test
     @Throws(Exception::class)
     fun testGetSpecialtyNotFound() {
-        given(specialtyService.findById(-1)).willReturn(Optional.empty())
+        given(specialtyRepository.findById(-1)).willReturn(Optional.empty())
         mockMvc.perform(
             get("/api/specialties/-1")
                 .accept(MediaType.APPLICATION_JSON)
@@ -77,7 +88,7 @@ class SpecialtyControllerTests {
     @Test
     @Throws(Exception::class)
     fun testGetAllSpecialtiesSuccess() {
-        given(specialtyService.findAll()).willReturn(listOf(surgery, dentistry))
+        given(specialtyRepository.findAll()).willReturn(listOf(surgery, dentistry))
         mockMvc.perform(
             get("/api/specialties/")
                 .accept(MediaType.APPLICATION_JSON)
@@ -92,7 +103,7 @@ class SpecialtyControllerTests {
 
     @Test
     fun testGetAllSpecialtiesNotFound() {
-        given(specialtyService.findAll())
+        given(specialtyRepository.findAll())
             .willReturn(emptyList())
         mockMvc.perform(
             get("/api/specialties/")
@@ -104,16 +115,11 @@ class SpecialtyControllerTests {
 
     @Test
     fun testCreateSpecialtySuccess() {
+        radiology
+        given(specialtyRepository.save(any<Specialty>())).willReturn(newSpecialty)
         mockMvc.perform(
             post("/api/specialties/")
-                .content(
-                    jacksonObjectMapper()
-                        .writeValueAsString(
-                            Specialty(radiology).apply {
-                                id = 999
-                            }
-                        )
-                )
+                .content(jacksonObjectMapper().writeValueAsString(newSpecialty))
                 .accept(MediaType.APPLICATION_JSON_VALUE)
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
         )
@@ -143,12 +149,10 @@ class SpecialtyControllerTests {
     @Throws(Exception::class)
     fun testUpdateSpecialtySuccess() {
 
-        val newSpecialty = Specialty(surgery).apply {
-            name = "surgery I"
-        }
-        given(specialtyService.findById(2))
+        val newSpecialty = renamedSurgery
+        given(specialtyRepository.findById(2))
             .willReturn(Optional.of(surgery))
-        given(specialtyService.save(any<Specialty>())).willReturn(newSpecialty)
+        given(specialtyRepository.save(any<Specialty>())).willReturn(newSpecialty)
 
         val putAction =
             put("/api/specialties/2")
@@ -178,7 +182,7 @@ class SpecialtyControllerTests {
     fun testUpdateSpecialtyError() {
         mockMvc.perform(
             put("/api/specialties/1")
-                .content(jacksonObjectMapper().writeValueAsString(Specialty(radiology).apply { name = "" }))
+                .content(jacksonObjectMapper().writeValueAsString(emptyName))
                 .accept(MediaType.APPLICATION_JSON_VALUE)
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
         ).andExpect(status().isBadRequest)
@@ -187,11 +191,10 @@ class SpecialtyControllerTests {
     @Test
     @Throws(Exception::class)
     fun testDeleteSpecialtySuccess() {
-        given(specialtyService.findById(1)).willReturn(Optional.of(radiology))
+        given(specialtyRepository.findById(1)).willReturn(Optional.of(radiology))
 
         mockMvc.perform(
             delete("/api/specialties/1")
-                .content(jacksonObjectMapper().writeValueAsString(Specialty(radiology)))
                 .accept(MediaType.APPLICATION_JSON_VALUE)
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
         ).andExpect(status().isNoContent)
@@ -200,11 +203,10 @@ class SpecialtyControllerTests {
     @Test
     @Throws(Exception::class)
     fun testDeleteSpecialtyError() {
-        given(specialtyService.findById(-1)).willReturn(Optional.empty())
+        given(specialtyRepository.findById(-1)).willReturn(Optional.empty())
 
         mockMvc.perform(
             delete("/api/specialties/-1")
-                .content(jacksonObjectMapper().writeValueAsString(Specialty(radiology)))
                 .accept(MediaType.APPLICATION_JSON_VALUE)
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
         ).andExpect(status().isNotFound)

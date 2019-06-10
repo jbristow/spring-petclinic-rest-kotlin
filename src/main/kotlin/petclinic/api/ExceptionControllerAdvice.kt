@@ -16,41 +16,23 @@
 
 package petclinic.api
 
-import com.fasterxml.jackson.core.JsonProcessingException
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.FieldError
 import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
-import org.springframework.web.bind.annotation.ResponseBody
-import org.springframework.web.bind.annotation.ResponseStatus
 
 @ControllerAdvice
 class ExceptionControllerAdvice {
 
     val log: Logger = LoggerFactory.getLogger(this::class.java)
 
-    @ExceptionHandler(Exception::class)
-    fun exception(e: Exception): ResponseEntity<String> {
-        return ResponseEntity
-            .badRequest()
-            .body(
-                try {
-                    jacksonObjectMapper().writeValueAsString(ErrorInfo(e))
-                } catch (e: JsonProcessingException) {
-                    e.printStackTrace()
-                    "{}"
-                }
-            )
-    }
-
-    private data class ErrorInfo(val className: String, val exMessage: String?) {
-        constructor(ex: Exception) :
-            this(ex.javaClass.name, ex.localizedMessage)
+    @ExceptionHandler(RestNotFoundException::class)
+    fun handleNotFound(ex: RestNotFoundException): ResponseEntity<String> {
+        log.error("handling a not found... $ex")
+        return ResponseEntity.notFound().build()
     }
 
     data class ValidationMessage(val field: String, val message: String)
@@ -63,9 +45,4 @@ class ExceptionControllerAdvice {
                     ValidationMessage((it as FieldError).field, it.defaultMessage ?: "")
                 }
             )
-
-    @ExceptionHandler(RestNotFoundException::class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    @ResponseBody
-    fun handleNotFound(ex: RestNotFoundException) = ex.message!!
 }

@@ -60,5 +60,7 @@ class Vet(
         specialties = emptySet()
     }
 
+    override fun toString() = "Vet(id=$id, firstName=$firstName, lastName=$lastName, specialties=$specialties)"
+
     class NotFoundException(id: Int) : RestNotFoundException("Vet", id)
 }

@@ -27,4 +27,6 @@ open class Specialty(id: Int? = null, name: String? = null) : NamedEntity(id, na
     constructor(other: Specialty) : this(other.id, other.name)
 
     class NotFoundException(id: Int) : RestNotFoundException("Specialty", id)
+
+    override fun toString() = "Specialty(id=$id, name=$name)"
 }

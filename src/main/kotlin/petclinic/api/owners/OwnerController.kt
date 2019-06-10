@@ -16,86 +16,40 @@
 
 package petclinic.api.owners
 
-import org.springframework.hateoas.Resource
 import org.springframework.http.HttpStatus
-import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.CrossOrigin
-import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.PutMapping
-import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
-import org.springframework.web.util.UriComponentsBuilder
-import javax.transaction.Transactional
-import javax.validation.Valid
+import petclinic.api.BaseController
 
 @RestController
 @CrossOrigin(exposedHeaders = ["errors, content-type"])
 @RequestMapping("/api/owners")
-class OwnerController(
-    private val ownerRepository: OwnerRepository
-) {
+class OwnerController(ownerRepository: OwnerRepository) :
+    BaseController<Owner, OwnerRepository>("owners", ownerRepository) {
 
-    @GetMapping
-    fun getOwners(): Iterable<Owner> = ownerRepository.findAll()
+    override fun notFoundProvider(id: Int) = Owner.NotFoundException(id)
+
+    override fun updateFn(a: Owner, b: Owner) {
+        a.address = b.address
+        a.city = b.city
+        a.firstName = b.firstName
+        a.lastName = b.lastName
+        a.telephone = b.telephone
+    }
 
     @GetMapping("/*/lastname/{lastName}")
     @ResponseStatus(HttpStatus.OK)
     fun getOwnersList(@PathVariable("lastName") ownerLastName: String) =
-        ownerRepository.findByLastName(ownerLastName)
+        repository.findByLastName(ownerLastName)
 
-    @GetMapping("/{ownerId}")
-    fun getOwner(@PathVariable("ownerId") ownerId: Int): Resource<Owner> =
-        Resource(ownerRepository.findById(ownerId).orElseGet { throw Owner.NotFoundException(ownerId) })
-
-    @PostMapping
-    fun addOwner(
-        @RequestBody @Valid owner: Owner,
-        uriComponentsBuilder: UriComponentsBuilder
-    ): ResponseEntity<Owner> {
-        val output = ownerRepository.save(owner)
-        return ResponseEntity
-            .created(
-                uriComponentsBuilder.path("api/owners/{id}").buildAndExpand("${output.id}").toUri()
-            )
-            .body(output)
-    }
-
-    @PutMapping("/{ownerId}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    fun updateOwner(
-        @PathVariable("ownerId") ownerId: Int,
-        @RequestBody @Valid owner: Owner
-    ) =
-        Resource(ownerRepository.findById(ownerId)
-            .orElseGet { throw Owner.NotFoundException(ownerId) }
-            .apply {
-                address = owner.address
-                city = owner.city
-                firstName = owner.firstName
-                lastName = owner.lastName
-                telephone = owner.telephone
-            })
-
-    @DeleteMapping("/{ownerId}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    @Transactional
-    fun deleteOwner(@PathVariable("ownerId") ownerId: Int) {
-        val owner = ownerRepository.findById(ownerId)
-            .orElseGet { throw Owner.NotFoundException(ownerId) }
-        ownerRepository.delete(owner)
-    }
-
-    @GetMapping("/{ownerId}/pets")
-    fun getPetsForOwner(
-        @PathVariable("ownerId") ownerId: Int
-    ) =
-        ownerRepository
-            .findById(ownerId)
-            .orElseGet { throw Owner.NotFoundException(ownerId) }
+    @GetMapping("/{id}/pets")
+    fun getPetsForOwner(@PathVariable("id") id: Int) =
+        repository
+            .findById(id)
+            .orElseGet { throw Owner.NotFoundException(id) }
             .pets
 }
