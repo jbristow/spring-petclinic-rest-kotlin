@@ -52,6 +52,7 @@ dependencies {
     compile(springBootStarter("web"))
     runtime("mysql:mysql-connector-java:8.0.16")
     runtime("org.hsqldb:hsqldb:2.4.1")
+    runtime("com.h2database:h2:1.4.199")
     runtime("org.postgresql:postgresql:42.2.5")
     runtime(springBootStarter("tomcat"))
     testCompile("com.jayway.jsonpath:json-path:2.4.0")
