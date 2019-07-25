@@ -19,26 +19,14 @@ import javax.persistence.Column
 import javax.persistence.MappedSuperclass
 import javax.validation.constraints.NotEmpty
 
-/**
- * Simple JavaBean domain object representing an person.
- *
- * @author Ken Krebs
- */
 @MappedSuperclass
-open class Person(id: Int? = null, firstName: String?, lastName: String?) : BaseEntity(id) {
-
-    constructor() : this(null, null, null)
-
-    @Column(name = "firstName")
+abstract class Person(
+    id: Int = 0,
+    @Column(name = "first_name")
     @get:NotEmpty
-    var firstName: String? = null
+    var firstName: String,
 
     @Column(name = "last_name")
     @get:NotEmpty
-    var lastName: String? = null
-
-    init {
-        this.firstName = firstName
-        this.lastName = lastName
-    }
-}
+    var lastName: String
+) : BaseEntity(id)

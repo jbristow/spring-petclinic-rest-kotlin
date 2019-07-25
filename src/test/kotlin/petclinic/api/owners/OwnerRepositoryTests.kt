@@ -39,16 +39,16 @@ class OwnerRepositoryTests(
         val owners = ownerRepository.findByLastName("Schultz")
         val found = owners.size
 
-        val owner = Owner().apply {
-            firstName = "Sam"
-            lastName = "Schultz"
-            address = "4, Evans Street"
-            city = "Wollongong"
+        val owner = Owner(
+            firstName = "Sam",
+            lastName = "Schultz",
+            address = "4, Evans Street",
+            city = "Wollongong",
             telephone = "4444444444"
-        }
+        )
         ownerRepository.save(owner)
 
-        assertThat(owner.id).isNotNull()
+        assertThat(owner.id).isNotEqualTo(0)
 
         val ownersActual = ownerRepository.findByLastName("Schultz")
         assertThat(ownersActual.size).isEqualTo(found + 1)

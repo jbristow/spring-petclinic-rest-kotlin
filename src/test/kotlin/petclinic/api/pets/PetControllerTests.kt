@@ -37,7 +37,6 @@ import petclinic.api.owners.Owner
 import petclinic.api.owners.OwnerControllerTests.Companion.owner1
 import petclinic.api.owners.OwnerRepository
 import petclinic.api.pettypes.PetTypeControllerTests.Companion.dog
-import java.util.Date
 import java.util.Optional
 
 @WebMvcTest(controllers = [PetController::class])
@@ -55,22 +54,22 @@ open class PetControllerTests {
 
     companion object {
         val pet3: Pet
-            get() = Pet(id = 3, name = "Rosy", birthDate = Date(), owner = owner1, type = dog)
+            get() = Pet(id = 3, name = "Rosy", owner = owner1, type = dog)
 
         val pet4: Pet
-            get() = Pet(id = 4, name = "Jewel", birthDate = Date(), owner = owner1, type = dog)
+            get() = Pet(id = 4, name = "Jewel", owner = owner1, type = dog)
 
         val pet8: Pet
-            get() = Pet(id = 8, name = "Rosy", birthDate = Date(), owner = owner1, type = dog)
+            get() = Pet(id = 8, name = "Rosy", owner = owner1, type = dog)
 
         val newPet: Pet
-            get() = Pet(id = 999, name = "Rosy", birthDate = Date(), owner = owner1, type = dog)
+            get() = Pet(id = 999, name = "Rosy", owner = owner1, type = dog)
 
         val pet3EmptyName: Pet
-            get() = Pet(id = 3, name = "", birthDate = Date(), owner = owner1, type = dog)
+            get() = Pet(id = 3, name = "", owner = owner1, type = dog)
 
         val pet3UpdatedName: Pet
-            get() = Pet(id = 3, name = "Rosy I", birthDate = Date(), owner = owner1, type = dog)
+            get() = Pet(id = 3, name = "Rosy I", owner = owner1, type = dog)
     }
 
     @Test
@@ -125,7 +124,17 @@ open class PetControllerTests {
     @Test
     fun testGetPetsByOwnerIdSuccess() {
         given(ownerRepository.findById(3)).willReturn(
-            Optional.of(Owner(id = 3, pets = setOf(pet3, pet4)))
+            Optional.of(
+                Owner(
+                    id = 3,
+                    firstName = "",
+                    lastName = "",
+                    city = "",
+                    address = "",
+                    telephone = "",
+                    pets = setOf(pet3, pet4)
+                )
+            )
         )
         mockMvc.perform(
             get("/api/pets/getPetsByOwnerId/3")
@@ -152,7 +161,16 @@ open class PetControllerTests {
     @Test
     fun testGetPetsByOwnerIdPetsNotFound() {
         given(ownerRepository.findById(3)).willReturn(
-            Optional.of(Owner().apply { id = 3 })
+            Optional.of(
+                Owner(
+                    id = 3,
+                    firstName = "",
+                    lastName = "",
+                    city = "",
+                    address = "",
+                    telephone = ""
+                )
+            )
         )
         mockMvc.perform(
             get("/api/pets/getPetsByOwnerId/3")
@@ -166,20 +184,27 @@ open class PetControllerTests {
     fun testCreatePetSuccess() {
 
         given(petRepository.save(any<Pet>())).willReturn(newPet)
-        mockMvc.perform(
+
+        val petJson = jacksonObjectMapper().writeValueAsString(newPet)
+        println("*** json: $petJson")
+
+        val performance = mockMvc.perform(
             post("/api/pets/")
-                .content(jacksonObjectMapper().writeValueAsString(newPet))
+                .content(petJson)
                 .accept(MediaType.APPLICATION_JSON_VALUE)
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
         )
-            .andExpect(status().isCreated)
+        println("*** ${performance.andReturn().response.status}")
+        println("*** ${performance.andReturn().response.errorMessage}")
+        println("*** ${performance.andReturn().response.contentAsString}")
+        performance.andExpect(status().isCreated)
     }
 
     @Test
     fun testCreatePetError() {
         mockMvc.perform(
             post("/api/pets/")
-                .content(jacksonObjectMapper().writeValueAsString(Pet()))
+                .content("{}")
                 .accept(MediaType.APPLICATION_JSON_VALUE)
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
         )

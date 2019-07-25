@@ -9,7 +9,6 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import petclinic.api.owners.OwnerRepository
 import petclinic.api.pettypes.PetTypeRepository
-import java.util.Date
 import javax.transaction.Transactional
 
 @ExtendWith(SpringExtension::class)
@@ -23,7 +22,7 @@ class PetRepositoryTest(
     fun shouldFindPetWithCorrectId() {
         val pet7 = petRepository.findById(7).get()
         assertThat(pet7.name).isEqualTo("Samantha")
-        assertThat(pet7.owner?.firstName).isEqualTo("Jean")
+        assertThat(pet7.owner.firstName).isEqualTo("Jean")
     }
 
     @Test
@@ -32,10 +31,11 @@ class PetRepositoryTest(
         val owner6 = ownerRepository.findById(6).get()
         val found = owner6.pets.size
 
-        val pet = Pet(name = "bowser")
-        val types = petTypeRepository.findAll()
-        pet.type = types.find { it.id == 2 }
-        pet.birthDate = Date()
+        val pet = Pet(
+            name = "bowser",
+            owner = owner6,
+            type = petTypeRepository.findAll().find { it.id == 2 }!!
+        )
         owner6.addPet(pet)
         assertThat(owner6.pets.size).isEqualTo(found + 1)
 
@@ -44,8 +44,9 @@ class PetRepositoryTest(
 
         val owner6Actual = ownerRepository.findById(6).get()
         assertThat(owner6Actual.pets).hasSize(found + 1)
+
         // checks that id has been generated
-        assertThat(pet.id).isNotNull()
+        assertThat(pet.id).isNotZero()
     }
 
     @Test

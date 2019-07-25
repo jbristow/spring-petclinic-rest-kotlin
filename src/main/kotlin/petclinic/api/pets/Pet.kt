@@ -16,6 +16,7 @@
 package petclinic.api.pets
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import org.springframework.data.jpa.repository.Temporal
 import org.springframework.format.annotation.DateTimeFormat
 import petclinic.api.RestNotFoundException
 import petclinic.api.owners.Owner
@@ -30,28 +31,21 @@ import javax.persistence.FetchType
 import javax.persistence.JoinColumn
 import javax.persistence.ManyToOne
 import javax.persistence.OneToMany
-import javax.persistence.Table
-import javax.persistence.Temporal
-import javax.persistence.TemporalType
 
-@Entity
-@Table(name = "pets")
-open class Pet(
-    id: Int? = null,
-    name: String? = null,
-    @Column(name = "birth_date") @Temporal(TemporalType.DATE) @DateTimeFormat(pattern = "yyyy/MM/dd") open var birthDate: Date? = null,
-
-    @ManyToOne @JoinColumn(name = "type_id") var type: PetType? = null,
+@Entity(name = "pets")
+class Pet(
+    id: Int = 0,
+    name: String,
+    @Column(name = "birth_date") @Temporal @DateTimeFormat(pattern = "yyyy/MM/dd") var birthDate: Date = Date(),
+    @ManyToOne @JoinColumn(name = "type_id") var type: PetType,
     @JsonIgnoreProperties("pets")
-    @ManyToOne @JoinColumn(name = "owner_id") var owner: Owner? = null,
+    @ManyToOne @JoinColumn(name = "owner_id") var owner: Owner,
     visits: Set<Visit> = emptySet()
 ) : NamedEntity(id, name) {
 
-    constructor(other: Pet) : this(other.id, other.name, other.birthDate, other.type, other.owner, other.visits)
-
     @JsonIgnoreProperties("pet")
     @OneToMany(cascade = [CascadeType.ALL], mappedBy = "pet", fetch = FetchType.EAGER, targetEntity = Visit::class)
-    open var visits = visits
+    var visits = visits
         get() {
             return field.toSortedSet(Comparator { o1, o2 -> o1.date.compareTo(o2.date) })
         }

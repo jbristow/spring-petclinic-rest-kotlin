@@ -134,8 +134,8 @@ class SpecialtyControllerTests {
                 .content(
                     jacksonObjectMapper().writeValueAsString(
                         Specialty(radiology).apply {
-                            id = null
-                            name = null
+                            id = -1
+                            name = ""
                         }
                     )
                 )

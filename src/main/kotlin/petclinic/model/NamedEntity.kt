@@ -1,11 +1,8 @@
 package petclinic.model
 
-import javax.persistence.Column
 import javax.persistence.MappedSuperclass
 import javax.validation.constraints.NotEmpty
 
 @MappedSuperclass
-open class NamedEntity(
-    id: Int? = null,
-    @get:NotEmpty @Column var name: String? = null
-) : BaseEntity(id)
+abstract class NamedEntity protected constructor(id: Int = 0, @get:NotEmpty var name: String) :
+    BaseEntity(id)

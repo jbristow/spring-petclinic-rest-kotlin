@@ -24,6 +24,7 @@ class SpecialtyRepositoryTests(
     @Test
     fun shouldFindAllSpecialties() {
         val specialties = specialtyRepository.findAll()
+        println(specialties)
         assertThat(specialties).extracting("id", "name")
             .contains(tuple(1, "radiology"), tuple(3, "dentistry"))
     }

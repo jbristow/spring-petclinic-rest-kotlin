@@ -33,11 +33,10 @@ class PetTypeRepositoryTests(
         val petTypes = petTypeRepository.findAll()
         val found = petTypes.count()
 
-        val petType = PetType()
-        petType.name = "tiger"
+        val petType = PetType(name = "tiger")
 
         petTypeRepository.save(petType)
-        assertThat(petType.id).isNotNull()
+        assertThat(petType.id).isNotZero()
 
         val petTypesActual = petTypeRepository.findAll()
         assertThat(petTypesActual).hasSize(found + 1)

@@ -214,7 +214,11 @@ open class OwnerControllerTests {
     fun testCreateOwnerError() {
         val resultActions = mockMvc.perform(
             post("/api/owners/")
-                .content("""{"id":0,"firstName":null}""").accept(MediaType.APPLICATION_JSON_VALUE).contentType(
+                .content(
+                    jacksonObjectMapper().writeValueAsString(mapOf("id" to -1, "first_name" to "", "last_name" to ""))
+                ).accept(
+                    MediaType.APPLICATION_JSON_VALUE
+                ).contentType(
                     MediaType.APPLICATION_JSON_VALUE
                 )
         )

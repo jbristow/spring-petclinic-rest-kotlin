@@ -34,7 +34,7 @@ class VisitRepositoryTests(
         val pet7Actual = petService.findById(7).get()
         assertThat(pet7Actual.visits).hasSize(found + 1)
 
-        assertThat(visit.id).isNotNull()
+        assertThat(visit.id).isNotZero()
     }
 
     @Test
@@ -42,8 +42,7 @@ class VisitRepositoryTests(
         val visits = visitService.findByPetId(7)
         assertThat(visits).hasSize(2)
         visits[0].run {
-            assertThat(pet).isNotNull
-            assertThat(date).isNotNull()
+            assertThat(pet).isNotNull()
             assertThat(pet?.id).isEqualTo(7)
         }
     }
@@ -73,7 +72,7 @@ class VisitRepositoryTests(
         val visit = Visit(pet = pet, date = Date(), description = "new visits")
 
         visitService.save(visit)
-        assertThat(visit.id).isNotNull()
+        assertThat(visit.id).isNotZero()
 
         val visitsActual = visitService.findAll()
         assertThat(visitsActual).hasSize(found + 1)

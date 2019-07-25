@@ -120,7 +120,7 @@ class PetTypeControllerTests {
 
     @Test
     fun testCreatePetTypeError() {
-        val newPetType = PetType()
+        val newPetType = PetType(name = "")
         val mapper = jacksonObjectMapper()
         val newPetTypeAsJSON = mapper.writeValueAsString(newPetType)
         mockMvc.perform(
@@ -179,7 +179,7 @@ class PetTypeControllerTests {
 
     @Test
     fun testDeletePetTypeError() {
-        val newPetTypeAsJSON = jacksonObjectMapper().writeValueAsString(PetType())
+        val newPetTypeAsJSON = jacksonObjectMapper().writeValueAsString(PetType(name = "", id = -1))
         given(petTypeRepository.findById(-1)).willReturn(Optional.empty())
         mockMvc.perform(
             delete("/api/pettypes/-1")

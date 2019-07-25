@@ -37,6 +37,7 @@ abstract class BaseController<T : BaseEntity, R : CrudRepository<T, Int>>(
         @RequestBody @Valid t: T,
         uriComponentsBuilder: UriComponentsBuilder
     ): ResponseEntity<T> {
+        println("*** ADD T: $t")
         val saved = repository.save(t)
         return ResponseEntity.created(uriComponentsBuilder.buildEntityUri(saved, pathElement)).body(saved)
     }
@@ -63,4 +64,3 @@ abstract class BaseController<T : BaseEntity, R : CrudRepository<T, Int>>(
         repository.delete(t)
     }
 }
-

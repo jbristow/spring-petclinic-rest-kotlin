@@ -24,39 +24,22 @@ import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.FetchType
 import javax.persistence.OneToMany
-import javax.persistence.Table
 import javax.validation.constraints.Digits
 import javax.validation.constraints.NotEmpty
 
-@Entity
-@Table(name = "owners")
+@Entity(name = "owners")
 class Owner(
-    id: Int? = null,
-    firstName: String? = null,
-    lastName: String? = null,
-    @Column @get:NotEmpty var address: String? = null,
-    @Column @get:NotEmpty var city: String? = null,
-    @Column @get:NotEmpty @Digits(fraction = 0, integer = 10) var telephone: String? = null,
+    id: Int = 0,
+    firstName: String = "",
+    lastName: String = "",
+    @Column @get:NotEmpty var address: String = "",
+    @Column @get:NotEmpty var city: String = "",
+    @Column @get:NotEmpty @Digits(fraction = 0, integer = 10) var telephone: String = "",
     pets: Set<Pet> = emptySet()
 ) : Person(id, firstName, lastName) {
 
-    constructor(other: Owner) : this(
-        other.id,
-        other.firstName,
-        other.lastName,
-        other.address,
-        other.city,
-        other.telephone,
-        other.pets
-    )
-
     private class PetComparator : Comparator<Pet> {
-        override fun compare(o1: Pet?, o2: Pet?) = when {
-            o1 == null && o2 == null -> 0
-            o1 == null -> -1
-            o2 == null -> 1
-            else -> o1.name?.compareTo(o2.name ?: "") ?: 0
-        }
+        override fun compare(o1: Pet, o2: Pet) = o1.name.compareTo(o2.name)
     }
 
     @Column
@@ -71,15 +54,6 @@ class Owner(
         pets = pets + pet
         pet.owner = this
     }
-
-    /**
-     * Return the Pet with the given name, or null if none found for this owners.
-     *
-     * @param name to test
-     * @return true if pets name is already in use
-     */
-    fun getPet(name: String, ignoreNew: Boolean = false): Pet? =
-        pets.firstOrNull { (!ignoreNew || !it.isNew) && name.equals(it.name, ignoreCase = true) }
 
     override fun toString() =
         "Owner(id=$id, firstName=$firstName, lastName=$lastName, address=$address, city=$city, telephone=$telephone, pets=$pets)"

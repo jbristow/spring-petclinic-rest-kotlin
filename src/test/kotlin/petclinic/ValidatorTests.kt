@@ -20,9 +20,7 @@ class ValidatorTests {
     fun shouldNotValidateWhenFirstNameEmpty() {
 
         LocaleContextHolder.setLocale(Locale.ENGLISH)
-        val person = Person()
-        person.firstName = ""
-        person.lastName = "smith"
+        val person = object : Person(firstName = "", lastName = "smith") {}
 
         val validator = createValidator()
         val constraintViolations = validator.validate(person)
